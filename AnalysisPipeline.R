@@ -11,13 +11,13 @@
 #################################################################################################################################################
 #################################################################################################################################################
 
-# The following code uses RNAseq data from male reproductive organs of the Drosophila virilis subgroup
-## set-up 2
 
 ## Load annotations information
 grpTrinotate = read.csv(file = "Annotations/Trinotate_report_dvir1.06_subset.txt", sep = "\t", header = T, na.strings = ".", stringsAsFactors=FALSE)
 gffRecord = read.table(file = "Annotations/FBgn_ID_name_coordinates.txt", header = T)
 melOrths = read.table(file = "Annotations/mel_orths.txt", header = T)
+melSFPs = read.table(file = "Annotations/ACPlist.Findlay.20130301.txt", header = T, sep = "\t")
+melRPKM = read.table(file = "Annotations/mel.modEncode.RPKM.matrix", header = T, sep = "\t")
 melOrthsAll = aggregate(mel_GeneSymbol~FBgn_ID, data = melOrths, toString)
 tmp.merged = merge(melOrthsAll, grpTrinotate, all=TRUE)
 Annots = merge(tmp.merged, gffRecord, all=TRUE)
@@ -1169,13 +1169,7 @@ plot_grid(gg1, gg2, ncol = 1)
 
 ###############################################################################
 ###############################################################################
-## mel orthologues:
-melSFPs = read.table(file = "Annotations/ACPlist.Findlay.20130301.txt", header = T, sep = "\t")
-melRPKM = read.table(file = "Annotations/mel.modEncode.RPKM.matrix", header = T, sep = "\t")
-melRPKM.reduced.matrix = subset(melRPKM, select =c("mel_FBgn_ID", "Adult_Male_mated_4days_AccGlnd", "Adult_Male_mated_4days_head", "Adult_Male_mated_4days_testis"))
-##
-##melSFPs.RPKM.matrix = subset(melRPKM.reduced.matrix, mel_FBgn_ID %in% melSFPs$mel_FBgn_ID)
-#melSFPs.with.virOrth.list = as.character(unique(subset(melOrths, mel_FBgn_ID %in% melSFPs$mel_FBgn_ID)$mel_FBgn_ID))
+
 
 ## get dvir1.06 matrix of mel_SFP orthologues
 virOrths_melSFPs_unique=as.character(unique(subset(melOrths, mel_FBgn_ID %in% melSFPs$mel_FBgn_ID)$FBgn_ID))
@@ -1222,6 +1216,7 @@ aggregate(mel_FBgn_ID~FBgn_ID, data = jointNames, toString)
 
 
 ###### Set up mel.Encode TPM summary
+melRPKM.reduced.matrix = subset(melRPKM, select =c("mel_FBgn_ID", "Adult_Male_mated_4days_AccGlnd", "Adult_Male_mated_4days_head", "Adult_Male_mated_4days_testis"))
 mel.FBgn_ID_to_GeneSymbol= read.csv("Annotations/mel.FBgn_ID-to-GeneSymbol.txt", header = T, sep = "\t")
 melRPKM.tmp=melRPKM
 m.melRPKM.tmp = as.data.frame(melt(as.matrix(melRPKM.tmp)))
