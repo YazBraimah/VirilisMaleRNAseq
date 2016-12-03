@@ -1,31 +1,19 @@
 ## Thi script loads all the required packages and several custom plotting functions
 
-## Required packages
-library(bear)
-library(Biobase)
-library(cluster)
-library(cowplot)
-library(cummeRbund)
-library(data.table)
-library(DESeq)
-library(edgeR)
-library(ggplot2)
-library(ggrepel)
-library(ggthemes)
-library(GO.db)
-library(goseq)
-library(grid)
-library(gridExtra)
-library(qvalue)
-library(splitstackshape)
-library(statmod)
-library(VennDiagram)
+## Define required packages
+req_packages = c("bear","Biobase","cluster","cowplot","cummeRbund","data.table","DESeq","edgeR","ggplot2","ggrepel","ggthemes","GO.db","goseq","grid","gridExtra","qvalue","splitstackshape","statmod","VennDiagram")
+## Load them
+lapply(req_packages, require, character.only = TRUE)
+## Set ggplot's theme back to defaults (cowplot changes it)
 theme_set(theme_gray())
 
-## Load functions
+## Load heatmap script and miscellaneous R functions (From the Trinity package)
 source("heatmap.3.R")
 source("misc_rnaseq_funcs.R")
-#
+
+### Here're several convenient plotting functions:
+
+## MA plots between two columns of a matrix. Also calculates the proportion of genes that are >2-fold against the logCount.
 MA_BPlot <- function(data, col1, col2) {
   arguments <- as.list(match.call())
   y = eval(as.name(arguments$col2), data)
@@ -53,7 +41,8 @@ MA_BPlot <- function(data, col1, col2) {
   plots = plot_grid(b.plot, ma.plot, ncol = 1)
   return(plots)
 }
-#
+
+## Barplots of gene expression across tissues/species (dvir1.06 data)
 plotGeneG<-function(object, gene_id, logMode=FALSE){
   if (grepl("FBgn", gene_id)){
     geneName<-subset(Annots, FBgn_ID == gene_id)$gene_name
@@ -76,7 +65,8 @@ plotGeneG<-function(object, gene_id, logMode=FALSE){
   }
   return(p)
 }
-#
+
+## Barplots of gene expression across tissues/species (Trinity data)
 plotGeneT<-function(object, geneId, logMode=FALSE){
   if (grepl("amr", geneId)){
     trino<-amrTrinotate
@@ -103,25 +93,8 @@ plotGeneT<-function(object, geneId, logMode=FALSE){
   }
   return(p)
 }
-#
-YazSpecificity<-function(matrix,logMode=T,pseudocount=1,relative=FALSE){
-  tpms<-matrix
-  if(logMode){
-    tpms<-log10(tpms+pseudocount)
-  }
-  tpms<-t(makeprobs(t(tpms)))
-  d<-diag(ncol(tpms))
-  res<-apply(d,MARGIN=1,function(q){
-    JSdistFromP(tpms,q)
-  })
-  colnames(res)<-paste(colnames(tpms))
-  
-  if(relative){
-    res<-res/max(res)
-  }
-  1-res
-}
-#
+
+## Heatmap plotter (based on cummerBund's heatmap function)
 YazHeatmap <- function (object, rescaling = "row", clustering = "row", labCol = T, labRow = F, logMode = T, pseudocount = 1, border = FALSE, heatscale = c(low = "blue", mid = "black", high = "yellow"), heatMidpoint = NULL, method = "none", fullnames = T, replicates = FALSE, ...) {  
   
   m = object
@@ -214,7 +187,27 @@ YazHeatmap <- function (object, rescaling = "row", clustering = "row", labCol = 
   }
   return(g2)
 }  
-#
+
+## A function to calculate the tissue specificity index (based on CummerBund's S function)
+YazSpecificity<-function(matrix,logMode=T,pseudocount=1,relative=FALSE){
+  tpms<-matrix
+  if(logMode){
+    tpms<-log10(tpms+pseudocount)
+  }
+  tpms<-t(makeprobs(t(tpms)))
+  d<-diag(ncol(tpms))
+  res<-apply(d,MARGIN=1,function(q){
+    JSdistFromP(tpms,q)
+  })
+  colnames(res)<-paste(colnames(tpms))
+  
+  if(relative){
+    res<-res/max(res)
+  }
+  1-res
+}
+
+## Lookup annotation information of a given gene (dvir1.06 data)
 geneLookupG <- function(gene, complete=F) {
   if (complete){
     result <- noquote(t(subset(Annots, FBgn_ID == gene | gene_name == gene)))
@@ -224,7 +217,8 @@ geneLookupG <- function(gene, complete=F) {
   }
   return (result) 
 }
-#
+
+## Lookup annotation information of a given gene (Trinity data)
 geneLookupT <- function(Trinotate_file, gene, complete=F) {
   if (complete){
     result <- noquote(t(subset(Trinotate_file, gene_id == gene)))
@@ -234,8 +228,9 @@ geneLookupT <- function(Trinotate_file, gene, complete=F) {
   }
   return (result) 
 }
-##
-# from http://stackoverflow.com/questions/23559371/how-to-get-the-list-of-items-in-venn-diagram-in-r
+
+## Modifications of functions to compare groups of lists 
+## (from http://stackoverflow.com/questions/23559371/how-to-get-the-list-of-items-in-venn-diagram-in-r)
 Intersect <- function (x) {  
   # Multiple set version of intersect
   # x is a list
@@ -267,7 +262,8 @@ Setdiff <- function (x, y) {
   yy <- Union(y)
   setdiff(xx, yy)
 }
-#
+
+## Ouput the color IDs used by ggplot
 gg_color_hue <- function(n) {
   hues = seq(15, 375, length = n + 1)
   hcl(h = hues, l = 65, c = 100)[1:n]
