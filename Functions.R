@@ -2,8 +2,10 @@
 
 ## Define required packages
 req_packages = c("bear","Biobase","cluster","cowplot","cummeRbund","data.table","DESeq","edgeR","ggplot2","ggrepel","ggthemes","GO.db","goseq","grid","gridExtra","qvalue","splitstackshape","statmod","VennDiagram")
+
 ## Load them
 lapply(req_packages, require, character.only = TRUE)
+
 ## Set ggplot's theme back to defaults (cowplot changes it)
 theme_set(theme_gray())
 
@@ -21,7 +23,7 @@ MA_BPlot <- function(data, col1, col2) {
   M = log2(x/y)
   A = 0.5*log2(x*y);
   res = data.frame(row.names(data),x=M, y=A, row.names = 1)
-  res$bins <- cut(x=res$y, breaks=seq(from=0, to=20, by = 0.5), labels=c("0.5","1","1.5","2","2.5","3","3.5","4","4.5","5","5.5","6","6.5","7","7.5","8","8.5","9","9.5","10","10.5","11","11.5","12","12.5","13","13.5","14","14.5","15","15.5","16","16.5","17","17.5","18","18.5","19","19.5", "20"))
+  res$bins <- cut(x=res$y, breaks=seq(from=0, to=20, by = 0.5), labels=as.character(seq(0.5,20,0.5)))
   res$count = 1
   bad.res = subset(res, x >= 1 | x <= -1)
   bad.res = subset(bad.res, x != Inf & x != (-Inf))
@@ -31,7 +33,7 @@ MA_BPlot <- function(data, col1, col2) {
   off.2fold = data.frame(off.2fold)
   off.2fold <- cbind(log2Bin = row.names(off.2fold), off.2fold)
   rownames(off.2fold) <- NULL
-  off.2fold$log2Bin <- factor(off.2fold$log2Bin, levels=c("0.5","1","1.5","2","2.5","3","3.5","4","4.5","5","5.5","6","6.5","7","7.5","8","8.5","9","9.5","10","10.5","11","11.5","12","12.5","13","13.5","14","14.5","15","15.5","16","16.5","17","17.5","18","18.5","19","19.5", "20"))
+  off.2fold$log2Bin <- factor(off.2fold$log2Bin, levels=as.character(seq(0.5,20,0.5)))
   b.plot <- ggplot(off.2fold, aes(log2Bin, off.2fold)) + geom_bar(stat = "identity", fill="#F8766D", colour = "#00BFC4") + labs(y="prop. >2-fold", x="log2 read count bin") + theme(legend.position="none") + labs(title = paste(col1, "vs", col2, sep = " "), face = "bold")
   res$FC = NA
   res$FC[res$x > 1 ] = "above" 
