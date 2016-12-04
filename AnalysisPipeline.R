@@ -252,7 +252,7 @@ grpTPM2.tmp = grpTmmMatrix.BRR
 colnames(grpTPM2.tmp) = c(amrGoodReps, lumGoodReps, novGoodReps, virGoodReps)
 m.grpTPM2.tmp = as.data.frame(melt(as.matrix(grpTPM2.tmp)))
 m.grpTPM2.tmp = cSplit(as.data.frame(m.grpTPM2.tmp), "X2", "_")
-m.grpTPM2.tmp = data.frame(m.grpTPM2.tmp$X1, m.grpTPM2.tmp$X2$X1,m.grpTPM2.tmp$X2$X2, m.grpTPM2.tmp$value)
+m.grpTPM2.tmp = data.frame(m.grpTPM2.tmp$X1, m.grpTPM2.tmp$X2_1,m.grpTPM2.tmp$X2_2, m.grpTPM2.tmp$value)
 colnames(m.grpTPM2.tmp) = c("FBgn_ID", "species", "tissue", "TPM")
 m.grpTPM2.tmp.c = summarySE(m.grpTPM2.tmp, measurevar = "TPM", groupvars = c("FBgn_ID", "species", "tissue"))
 fbgn_to_geneName=subset(gffRecord, select=c(FBgn_ID, gene_name))
@@ -262,8 +262,8 @@ grpMeanTPMmatrix.BRR=cast(m.grpTPM2.tmp.c, FBgn_ID~species+tissue, value ="TPM")
 # amrTPM2.tmp = amrTmmMatrix.BRR
 # colnames(amrTPM2.tmp) = amrGoodReps
 # m.amrTPM2.tmp = as.data.frame(melt(as.matrix(amrTPM2.tmp)))
-# m.amrTPM2.tmp = within(m.amrTPM2.tmp, X2=data.frame(do.call('rbind', strsplit(as.character(X2),'_',fixed=TRUE))))
-# m.amrTPM2.tmp = data.frame(m.amrTPM2.tmp$X1, m.amrTPM2.tmp$X2$X1,m.amrTPM2.tmp$X2$X2, m.amrTPM2.tmp$value)
+# m.amrTPM2.tmp = cSplit(as.data.frame(m.amrTPM2.tmp), "X2", "_")
+# m.amrTPM2.tmp = data.frame(m.amrTPM2.tmp$X1, m.amrTPM2.tmp$X2_1,m.amrTPM2.tmp$X2_2, m.amrTPM2.tmp$value)
 # colnames(m.amrTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
 # TPMseBRR_amrTrin = summarySE(m.amrTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 # write.table(x = TPMseBRR_amrTrin, file = "ExpressionData/amrTrin3_TPMseBRR.txt", quote = F, sep = "\t", row.names = F)
@@ -273,8 +273,8 @@ amrMeanTPMmatrix.BRR=cast(TPMseBRR_amrTrin, trinity_id~species+tissue, value ="T
 # lumTPM2.tmp = lumTmmMatrix.BRR
 # colnames(lumTPM2.tmp) = lumGoodReps
 # m.lumTPM2.tmp = as.data.frame(melt(as.matrix(lumTPM2.tmp)))
-# m.lumTPM2.tmp = within(m.lumTPM2.tmp, X2=data.frame(do.call('rbind', strsplit(as.character(X2),'_',fixed=TRUE))))
-# m.lumTPM2.tmp = data.frame(m.lumTPM2.tmp$X1, m.lumTPM2.tmp$X2$X1,m.lumTPM2.tmp$X2$X2, m.lumTPM2.tmp$value)
+# m.lumTPM2.tmp = cSplit(as.data.frame(m.lumTPM2.tmp), "X2", "_")
+# m.lumTPM2.tmp = data.frame(m.lumTPM2.tmp$X1, m.lumTPM2.tmp$X2_1,m.lumTPM2.tmp$X2_2, m.lumTPM2.tmp$value)
 # colnames(m.lumTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
 # TPMseBRR_lumTrin = summarySE(m.lumTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 # write.table(x = TPMseBRR_lumTrin, file = "ExpressionData/lumTrin3_TPMseBRR.txt", quote = F, sep = "\t", row.names = F)
@@ -284,8 +284,8 @@ lumMeanTPMmatrix.BRR=cast(TPMseBRR_lumTrin, trinity_id~species+tissue, value ="T
 # novTPM2.tmp = novTmmMatrix.BRR
 # colnames(novTPM2.tmp) = novGoodReps
 # m.novTPM2.tmp = as.data.frame(melt(as.matrix(novTPM2.tmp)))
-# m.novTPM2.tmp = within(m.novTPM2.tmp, X2=data.frame(do.call('rbind', strsplit(as.character(X2),'_',fixed=TRUE))))
-# m.novTPM2.tmp = data.frame(m.novTPM2.tmp$X1, m.novTPM2.tmp$X2$X1,m.novTPM2.tmp$X2$X2, m.novTPM2.tmp$value)
+# m.novTPM2.tmp = cSplit(as.data.frame(m.novTPM2.tmp), "X2", "_")
+# m.novTPM2.tmp = data.frame(m.novTPM2.tmp$X1, m.novTPM2.tmp$X2_1,m.novTPM2.tmp$X2_2, m.novTPM2.tmp$value)
 # colnames(m.novTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
 # TPMseBRR_novTrin = summarySE(m.novTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 # write.table(x = TPMseBRR_novTrin, file = "ExpressionData/novTrin3_TPMseBRR.txt", quote = F, sep = "\t", row.names = F)
@@ -295,8 +295,8 @@ novMeanTPMmatrix.BRR=cast(TPMseBRR_novTrin, trinity_id~species+tissue, value ="T
 # virTPM2.tmp = virTmmMatrix.BRR
 # colnames(virTPM2.tmp) = virGoodReps
 # m.virTPM2.tmp = as.data.frame(melt(as.matrix(virTPM2.tmp)))
-# m.virTPM2.tmp = within(m.virTPM2.tmp, X2=data.frame(do.call('rbind', strsplit(as.character(X2),'_',fixed=TRUE))))
-# m.virTPM2.tmp = data.frame(m.virTPM2.tmp$X1, m.virTPM2.tmp$X2$X1,m.virTPM2.tmp$X2$X2, m.virTPM2.tmp$value)
+# m.virTPM2.tmp = cSplit(as.data.frame(m.virTPM2.tmp), "X2", "_")
+# m.virTPM2.tmp = data.frame(m.virTPM2.tmp$X1, m.virTPM2.tmp$X2_1,m.virTPM2.tmp$X2_2, m.virTPM2.tmp$value)
 # colnames(m.virTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
 # TPMseBRR_virTrin = summarySE(m.virTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 # write.table(x = TPMseBRR_virTrin, file = "ExpressionData/virTrin3_TPMseBRR.txt", quote = F, sep = "\t", row.names = F)
