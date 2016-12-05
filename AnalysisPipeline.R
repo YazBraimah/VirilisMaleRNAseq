@@ -13,20 +13,24 @@
 
 
 ## Load annotations information
-grpTrinotate = read.csv(file = "Annotations/Trinotate_report_dvir1.06_subset.txt", sep = "\t", header = T, na.strings = ".", stringsAsFactors=FALSE)
-gffRecord = read.table(file = "Annotations/FBgn_ID_name_coordinates.txt", header = T)
-melOrths = read.table(file = "Annotations/mel_orths.txt", header = T)
-melSFPs = read.table(file = "Annotations/ACPlist.Findlay.20130301.txt", header = T, sep = "\t")
-melRPKM = read.table(file = "Annotations/mel.modEncode.RPKM.matrix", header = T, sep = "\t")
-melOrthsAll = aggregate(mel_GeneSymbol~FBgn_ID, data = melOrths, toString)
-tmp.merged = merge(melOrthsAll, grpTrinotate, all=TRUE)
-Annots = merge(tmp.merged, gffRecord, all=TRUE)
-rm(grpTrinotate, melOrthsAll, tmp.merged)
-TrinOrths = read.table("Annotations/Trin3.orthology.txt", header = T, sep = "\t")
+grpTrinotate = read.csv("Annotations/Trinotate_report_dvir1.06_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
 amrTrinotate = read.csv("Annotations/Trinotate_report_amrTrin3_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
-lumTrinotate = read.csv("Annotations/Trinotate_report_lumTrin3_subset.txt", header = T, sep = "\t", na.strings = ".")
-novTrinotate = read.csv("Annotations/Trinotate_report_novTrin3_subset.txt", header = T, sep = "\t", na.strings = ".")
-virTrinotate = read.csv("Annotations/Trinotate_report_virTrin3_subset.txt", header = T, sep = "\t", na.strings = ".")
+lumTrinotate = read.csv("Annotations/Trinotate_report_lumTrin3_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
+novTrinotate = read.csv("Annotations/Trinotate_report_novTrin3_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
+virTrinotate = read.csv("Annotations/Trinotate_report_virTrin3_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
+
+gffRecord = read.table("Annotations/FBgn_ID_name_coordinates.txt", header = T)
+TrinOrths = read.table("Annotations/Trin3.orthology.txt", header = T, sep = "\t")
+
+## Load mel ortholog info
+melOrths = read.table(file = "Other.Drosophilas/Dmel/mel_orths.txt", header = T)
+melSFPs = read.table(file = "Other.Drosophilas/Dmel/ACPlist.Findlay.20130301.txt", header = T, sep = "\t")
+melRPKM = read.table(file = "Other.Drosophilas/Dmel/mel.modEncode.RPKM.matrix", header = T, sep = "\t")
+
+## Combine mel info with dvir1.06 Trinotate annotation
+melOrthsAll = aggregate(mel_GeneSymbol~FBgn_ID, data = melOrths, toString)
+Annots = merge(merge(melOrthsAll, grpTrinotate, all=TRUE), gffRecord, all=TRUE)
+
 ## Read in sample info:
 grpSamples_data = read.table("Annotations/samples.txt", header=F, check.names=F, fill=T)
 grpSamples_data = grpSamples_data[grpSamples_data[,2] != '',]
@@ -34,7 +38,6 @@ amrSamples_data = subset(grpSamples_data, grepl("amr", grpSamples_data$V1))
 lumSamples_data = subset(grpSamples_data, grepl("lum", grpSamples_data$V1))
 novSamples_data = subset(grpSamples_data, grepl("nov", grpSamples_data$V1))
 virSamples_data = subset(grpSamples_data, grepl("vir", grpSamples_data$V1))
-
 
 ## Read in count and TPM matrices:
 # all samples mapped to dvir1.06 transcriptome:
@@ -58,6 +61,8 @@ virCountsMatrix = read.table("ExpressionData/virTrin3.genes.counts.matrix", head
 virTpmMatrix.notCrossNorm = read.table("ExpressionData/virTrin3.genes.TPM.not_cross_norm.counts_by_min_TPM", header = T)
 virTmmMatrix = read.table("ExpressionData/virTrin3.genes.TMM.EXPR.matrix", header=T, row.names=1, com='', check.names=F)
 
+
+########################################## QC ###########################################
 
 # ## Barplot of gene counts by sample
 # libSizes = as.data.frame(colSums(grpCountsMatrix))
@@ -154,6 +159,7 @@ grpCountsMatrix.min200count = grpCountsMatrix[grp_max_gene_expr_per_row >= 200,,
 
 # Example MA plot between replicates
 # MA_BPlot(amrCountsMatrix.min400count, "amr_AG_1", "amr_AG_2")
+
 
 #########################################################################################
 ### Summary TPM table and matrix for gene level plots (includes all replicates) ######### 
