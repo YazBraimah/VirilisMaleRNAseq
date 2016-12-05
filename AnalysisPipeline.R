@@ -707,51 +707,51 @@ grid.arrange(gTree(children=vetted_AG_candidates_Vdiag))
 # dev.off()
 # 
 ## SFP candidates
-pdf("Plots/dvir1.06_SFP-candidates_Dame.pdf", height = 3)
-lapply(SFP_elements$D.ame, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_Dlum.pdf", height = 3)
-lapply(SFP_elements$D.lum, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_Dnov.pdf", height = 3)
-lapply(SFP_elements$D.nov, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_Dvir.pdf", height = 3)
-lapply(SFP_elements$D.vir, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum.pdf", height = 3)
-lapply(SFP_elements$`D.ame,D.lum`, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.nov.pdf", height = 3)
-lapply(SFP_elements$`D.ame,D.nov`, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.vir.pdf", height = 3)
-lapply(SFP_elements$`D.ame,D.vir`, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.lum-D.nov.pdf", height = 3)
-lapply(SFP_elements$`D.lum,D.nov`, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.lum-D.vir.pdf", height = 3)
-lapply(SFP_elements$`D.lum,D.vir`, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.nov-D.vir.pdf", height = 3)
-lapply(SFP_elements$`D.nov,D.vir`, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum-D.nov.pdf", height = 3)
-lapply(SFP_elements$`D.ame,D.lum,D.nov`, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum-D.vir.pdf", height = 3)
-lapply(SFP_elements$`D.ame,D.lum,D.vir`, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.nov-D.vir.pdf", height = 3)
-lapply(SFP_elements$`D.ame,D.nov,D.vir`, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.lum-D.nov-D.vir.pdf", height = 3)
-lapply(SFP_elements$`D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
-dev.off()
-pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum-D.nov-D.vir.pdf", height = 3)
-lapply(SFP_elements$`D.ame,D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
-dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_Dame.pdf", height = 3)
+# lapply(SFP_elements$D.ame, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_Dlum.pdf", height = 3)
+# lapply(SFP_elements$D.lum, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_Dnov.pdf", height = 3)
+# lapply(SFP_elements$D.nov, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_Dvir.pdf", height = 3)
+# lapply(SFP_elements$D.vir, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum.pdf", height = 3)
+# lapply(SFP_elements$`D.ame,D.lum`, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.nov.pdf", height = 3)
+# lapply(SFP_elements$`D.ame,D.nov`, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.vir.pdf", height = 3)
+# lapply(SFP_elements$`D.ame,D.vir`, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.lum-D.nov.pdf", height = 3)
+# lapply(SFP_elements$`D.lum,D.nov`, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.lum-D.vir.pdf", height = 3)
+# lapply(SFP_elements$`D.lum,D.vir`, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.nov-D.vir.pdf", height = 3)
+# lapply(SFP_elements$`D.nov,D.vir`, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum-D.nov.pdf", height = 3)
+# lapply(SFP_elements$`D.ame,D.lum,D.nov`, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum-D.vir.pdf", height = 3)
+# lapply(SFP_elements$`D.ame,D.lum,D.vir`, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.nov-D.vir.pdf", height = 3)
+# lapply(SFP_elements$`D.ame,D.nov,D.vir`, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.lum-D.nov-D.vir.pdf", height = 3)
+# lapply(SFP_elements$`D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
+# dev.off()
+# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum-D.nov-D.vir.pdf", height = 3)
+# lapply(SFP_elements$`D.ame,D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
+# dev.off()
 
 # ## EB candidates
 # pdf("Plots/dvir1.06_EB-candidates_Dame.pdf", height = 3)
@@ -1163,9 +1163,12 @@ paml.data$chromosome = factor (paml.data$chromosome, levels = c("Chr_X", "Chr_2"
 
 gg1=ggplot(subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` ), aes(max, omega, colour = I("#7aa457"))) + geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") + geom_point(size=2, alpha=0.75) + facet_grid(~chromosome, scales = "free_x") + geom_point(data = subset(paml.data, FBgn_ID %in% EB_elements$`D.ame,D.lum,D.nov,D.vir`& chromosome != "scaffold_12481"), aes(colour = I("#9e6ebd"))) + geom_text_repel(data=subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` & omega > 0.8), aes(label = gene_name), size =3, force = 30, colour = "black") + scale_colour_manual(name = "", values =c("#7aa457"="#7aa457","#9e6ebd"="#9e6ebd"), labels = c("SFPs","EB biased")) + scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + xlab ("Chromosome coordinates (Mb)")
 
-gg2=ggplot(subset(paml.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir` & omega < 900 & grepl("Chr", chromosome)), aes(max, omega, colour = I("#7aa457"))) + geom_point(alpha=0.55) + facet_grid(~chromosome, scale = "free_x") + scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + xlab ("Chromosome coordinates (Mb)") + scale_colour_manual(name = "", values ="#cb6751", labels = "testes biased")
+gg2=ggplot(subset(paml.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir` & omega < 900 & grepl("Chr", chromosome)), aes(max, omega, colour = I("#7aa457"))) + geom_point(alpha=0.55) + facet_grid(~chromosome, scale = "free_x") + scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + xlab ("Chromosome coordinates (Mb)") + scale_colour_manual(name = "", values ="#cb6751", labels = "testes biased") + scale_y_continuous(breaks=c(0.0,0.5,1.0,1.5,2.0,2.5), labels=expression("0.0", "0.5", "1.0", "1.5", "2.0", "2.5")) + geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red")
 
+pdf(file = "sample.pdf", width = 8.71, height = 3.26)
 plot_grid(gg1, gg2, ncol = 1)
+dev.off()
+
 
 ###############################################################################
 ###############################################################################
@@ -1181,21 +1184,15 @@ single_orth_table=as.data.frame(gsub(".*, ", "",melSFPs.with.virOrth.and.aggtd.v
 jointNames = cbind(melSFPs.with.virOrth.and.aggtd.vir.FBgn_ID$FBgn_ID, single_orth_table)
 colnames(jointNames) = c("FBgn_ID", "mel_FBgn_ID")
 #jointNames$FBgn_ID=levels(droplevels(jointNames$FBgn_ID))
-
+melRPKM.reduced.matrix = subset(melRPKM, select =c("mel_FBgn_ID", "Adult_Male_mated_4days_AccGlnd", "Adult_Male_mated_4days_head", "Adult_Male_mated_4days_testis"))
 melSFPs.RPKM.matrix = subset(melRPKM.reduced.matrix, mel_FBgn_ID %in% jointNames$mel_FBgn_ID)
 
-somethingTmp = merge(jointNames, melSFPs.RPKM.matrix, all=TRUE)
-somethingTmp = subset(somethingTmp, Adult_Male_mated_4days_AccGlnd != "NA" & FBgn_ID != "NA")
+tmp.melMatrix.SFPs = merge(jointNames, melSFPs.RPKM.matrix, all=TRUE)
+melMatrix.reduced.SFPs = subset(tmp.melMatrix.SFPs, Adult_Male_mated_4days_AccGlnd != "NA" & FBgn_ID != "NA")
 
 #unique(subset(somethingTmp, mel_FBgn_ID %in% melSFPs.with.virOrth.and.aggtd.vir.FBgn_ID$mel_FBgn_ID))
-somethingTmp2 = merge(somethingTmp, Gene_order, all=TRUE)
-melData.to.plot.heatmap=somethingTmp2[order(somethingTmp2$number),]
-melData.to.plot.heatmap = subset (melData.to.plot.heatmap, mel_FBgn_ID != "NA" & Adult_Male_mated_4days_AccGlnd != "NA")
-melData.to.plot.heatmap = subset (melData.to.plot.heatmap, select = c("FBgn_ID", "Adult_Male_mated_4days_AccGlnd", "Adult_Male_mated_4days_head", "Adult_Male_mated_4days_testis"))
-colnames(melData.to.plot.heatmap) = c("FBgn_ID", "AG", "Head", "testis")
-rownames(melData.to.plot.heatmap) = melData.to.plot.heatmap$FBgn_ID
-melData.to.plot.heatmap[,1] = NULL
 
+# Heatmap using ggplot function
 virOrths_melSFPs_unique.matrix = subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% jointNames$FBgn_ID)
 rownames(virOrths_melSFPs_unique.matrix) = virOrths_melSFPs_unique.matrix$FBgn_ID
 virOrths_melSFPs_unique.matrix[,1] = NULL
@@ -1216,7 +1213,7 @@ aggregate(mel_FBgn_ID~FBgn_ID, data = jointNames, toString)
 
 
 ###### Set up mel.Encode TPM summary
-melRPKM.reduced.matrix = subset(melRPKM, select =c("mel_FBgn_ID", "Adult_Male_mated_4days_AccGlnd", "Adult_Male_mated_4days_head", "Adult_Male_mated_4days_testis"))
+
 mel.FBgn_ID_to_GeneSymbol= read.csv("Annotations/mel.FBgn_ID-to-GeneSymbol.txt", header = T, sep = "\t")
 melRPKM.tmp=melRPKM
 m.melRPKM.tmp = as.data.frame(melt(as.matrix(melRPKM.tmp)))
@@ -1301,3 +1298,15 @@ for (feature_cat in factor_list) {
 }
 
 GO_enrichment_data = do.call(rbind, GO_enriched_list)
+
+
+###################
+##################
+
+mojACPorths = read.table(file = "Other.Drosophilas/dvir1.06_mojACP_orths_FBgn_IDs.txt", header = F,stringsAsFactors = F)
+mojACPorths = as.character(mojACPorths$V1)
+
+virOrths_mojSFPs.matrix = subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% mojACPorths)
+rownames(virOrths_mojSFPs.matrix) = virOrths_mojSFPs.matrix$FBgn_ID
+virOrths_mojSFPs.matrix[,1] = NULL
+YazHeatmap(virOrths_mojSFPs.matrix, clustering = "both", labRow = T)
