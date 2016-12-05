@@ -87,6 +87,16 @@ Gene_order$number = seq(1,87)
 colnames(Gene_order) = c("FBgn_ID", "number")
 ######################################################################################
 ######################################################################################
+
+melData.to.plot.heatmap = merge(melMatrix.reduced.SFPs, Gene_order, all=TRUE)
+melData.to.plot.heatmap=melData.to.plot.heatmap[order(melData.to.plot.heatmap$number),]
+melData.to.plot.heatmap = subset (melData.to.plot.heatmap, mel_FBgn_ID != "NA" & Adult_Male_mated_4days_AccGlnd != "NA")
+melData.to.plot.heatmap = subset (melData.to.plot.heatmap, select = c("FBgn_ID", "Adult_Male_mated_4days_AccGlnd", "Adult_Male_mated_4days_head", "Adult_Male_mated_4days_testis"))
+colnames(melData.to.plot.heatmap) = c("FBgn_ID", "AG", "Head", "testis")
+rownames(melData.to.plot.heatmap) = melData.to.plot.heatmap$FBgn_ID
+melData.to.plot.heatmap[,1] = NULL
+
+
 ######################################################################################
 
 data = melData.to.plot.heatmap
