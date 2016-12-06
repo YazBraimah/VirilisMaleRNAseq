@@ -39,6 +39,37 @@ lumSamples_data = subset(grpSamples_data, grepl("lum", grpSamples_data$V1))
 novSamples_data = subset(grpSamples_data, grepl("nov", grpSamples_data$V1))
 virSamples_data = subset(grpSamples_data, grepl("vir", grpSamples_data$V1))
 
+## Read in PAML and KaKs data 
+tmp.FB.names = unique(subset(Annots, select=c("FBgn_ID", "FBtr_ID")))
+paml.data = read.csv(file = "PAML.Files/PAML.branchSite.ALL.results.txt", header = T, sep = "\t")
+paml.data = merge(tmp.FB.names, paml.data, all=T)
+paml.data = merge(gffRecord, paml.data, all=T)
+KaKs.data = read.csv(file = "PAML.Files/KaKs.ALL.results.txt", header = T, sep = "\t", check.names = F)
+KaKs.data$COMPARISON = paste(KaKs.data$SEQ1, KaKs.data$SEQ2, sep="-")
+KaKs.data = merge(tmp.FB.names, KaKs.data, all=T)
+KaKs.data = merge(gffRecord, KaKs.data, all=T)
+
+#### Calaculate LRT, pValues and FDR
+paml.data$Damr_LRT = 2*(paml.data$Damr_brSt_H1 - paml.data$Damr_brSt_H0)
+paml.data$Damr_pValue = pchisq(q = paml.data$Damr_LRT, df = 1, lower.tail = F)
+paml.data$Damr_FDR = p.adjust(p = paml.data$Damr_pValue, method = "fdr")
+
+paml.data$Dlum_LRT = 2*(paml.data$Dlum_brSt_H1 - paml.data$Dlum_brSt_H0)
+paml.data$Dlum_pValue = pchisq(q = paml.data$Dlum_LRT, df = 1, lower.tail = F)
+paml.data$Dlum_FDR = p.adjust(p = paml.data$Dlum_pValue, method = "fdr")
+
+paml.data$Dnov_LRT = 2*(paml.data$Dnov_brSt_H1 - paml.data$Dnov_brSt_H0)
+paml.data$Dnov_pValue = pchisq(q = paml.data$Dnov_LRT, df = 1, lower.tail = F)
+paml.data$Dnov_FDR = p.adjust(p = paml.data$Dnov_pValue, method = "fdr")
+
+paml.data$Dvir_LRT = 2*(paml.data$Dvir_brSt_H1 - paml.data$Dvir_brSt_H0)
+paml.data$Dvir_pValue = pchisq(q = paml.data$Dvir_LRT, df = 1, lower.tail = F)
+paml.data$Dvir_FDR = p.adjust(p = paml.data$Dvir_pValue, method = "fdr")
+
+paml.data$DamrNov_LRT = 2*(paml.data$DamrNov_brSt_H1 - paml.data$DamrNov_brSt_H0)
+paml.data$DamrNov_pValue = pchisq(q = paml.data$DamrNov_LRT, df = 1, lower.tail = F)
+paml.data$DamrNov_FDR = p.adjust(p = paml.data$DamrNov_pValue, method = "fdr")
+
 ## Read in count and TPM matrices:
 # all samples mapped to dvir1.06 transcriptome:
 grpCountsMatrix = read.table("ExpressionData/genes_dvir1.06_allSamples.counts.matrix", header=T, row.names=1, com='', check.names=F)
@@ -309,7 +340,8 @@ novMeanTPMmatrix.BRR=cast(TPMseBRR_novTrin, trinity_id~species+tissue, value ="T
 TPMseBRR_virTrin=read.table(file = "ExpressionData/virTrin3_TPMseBRR.txt", header = T, sep = "\t")
 virMeanTPMmatrix.BRR=cast(TPMseBRR_virTrin, trinity_id~species+tissue, value ="TPM")
 
-##############################
+##########################################################
+##########################################################
 ## Create specificity matrices (dvir1.06)
 amr.dvir1.06.MeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_AG", "amr_CR", "amr_EB", "amr_TS"))
 tmp.amr.dvir1.06.MeanTPMmatrix = amr.dvir1.06.MeanTPMmatrix
@@ -350,35 +382,6 @@ dvir1.06_Specificity_table = YazSpecificity(tmp.grpMeanTPMmatrix)
 dvir1.06_Specificity_table = as.data.frame(dvir1.06_Specificity_table)
 rm(tmp.grpMeanTPMmatrix)
 
-## Create specificity matrices (Trinity)
-tmp.amrMeanTPMmatrix.BRR = amrMeanTPMmatrix.BRR
-rownames(tmp.amrMeanTPMmatrix.BRR) = tmp.amrMeanTPMmatrix.BRR[,1]
-tmp.amrMeanTPMmatrix.BRR[,1] = NULL
-amr_Specificity_table = YazSpecificity(tmp.amrMeanTPMmatrix.BRR)
-amr_Specificity_table = as.data.frame(amr_Specificity_table)
-rm(tmp.amrMeanTPMmatrix.BRR)
-
-tmp.lumMeanTPMmatrix.BRR = lumMeanTPMmatrix.BRR
-rownames(tmp.lumMeanTPMmatrix.BRR) = tmp.lumMeanTPMmatrix.BRR[,1]
-tmp.lumMeanTPMmatrix.BRR[,1] = NULL
-lum_Specificity_table = YazSpecificity(tmp.lumMeanTPMmatrix.BRR)
-lum_Specificity_table = as.data.frame(lum_Specificity_table)
-rm(tmp.lumMeanTPMmatrix.BRR)
-
-tmp.novMeanTPMmatrix.BRR = novMeanTPMmatrix.BRR
-rownames(tmp.novMeanTPMmatrix.BRR) = tmp.novMeanTPMmatrix.BRR[,1]
-tmp.novMeanTPMmatrix.BRR[,1] = NULL
-nov_Specificity_table = YazSpecificity(tmp.novMeanTPMmatrix.BRR)
-nov_Specificity_table = as.data.frame(nov_Specificity_table)
-rm(tmp.novMeanTPMmatrix.BRR)
-
-tmp.virMeanTPMmatrix.BRR = virMeanTPMmatrix.BRR
-rownames(tmp.virMeanTPMmatrix.BRR) = tmp.virMeanTPMmatrix.BRR[,1]
-tmp.virMeanTPMmatrix.BRR[,1] = NULL
-vir_Specificity_table = YazSpecificity(tmp.virMeanTPMmatrix.BRR)
-vir_Specificity_table = as.data.frame(vir_Specificity_table)
-rm(tmp.virMeanTPMmatrix.BRR)
-
 #############################################################################
 #############################################################################
 ############  edgeR DE analysis I: Trinity ind. species #####################
@@ -400,8 +403,8 @@ amr.lrt.AG.v.rest = glmLRT(amr.fit, contrast = amr.AG.Contrasts)
 amr.lrt.AG.v.rest.tTags = topTags(amr.lrt.AG.v.rest, n = NULL)
 amr.lrt.AG.v.rest.tTags.table = amr.lrt.AG.v.rest.tTags$table
 amr.AG.list=rownames(subset(amr.lrt.AG.v.rest.tTags.table, logFC.AG.v.CR > 2 & logFC.AG.v.EB > 2 & logFC.AG.v.TS > 2 & FDR<0.001))
+# extract candidate SFPs from AG list
 amr.SFP.list=unique(subset(amrTrinotate, gene_id %in% amr.AG.list & SignalP != "NA")$gene_id)
-amr.SFP.list = droplevels(amr.SFP.list)
 # EB-biased genes
 amr.EB.Contrasts=makeContrasts(EB.v.AG=amr_EB-amr_AG, EB.v.CR=amr_EB-amr_CR, EB.v.TS=amr_EB-amr_TS, levels = amr.design)
 amr.lrt.EB.v.rest = glmLRT(amr.fit, contrast = amr.EB.Contrasts)
@@ -430,6 +433,7 @@ lum.lrt.AG.v.rest = glmLRT(lum.fit, contrast = lum.AG.Contrasts)
 lum.lrt.AG.v.rest.tTags = topTags(lum.lrt.AG.v.rest, n = NULL)
 lum.lrt.AG.v.rest.tTags.table = lum.lrt.AG.v.rest.tTags$table
 lum.AG.list=rownames(subset(lum.lrt.AG.v.rest.tTags.table, logFC.AG.v.CR > 2 & logFC.AG.v.EB > 2 & logFC.AG.v.TS > 2 & FDR<0.001))
+# extract candidate SFPs from AG list
 lum.SFP.list=unique(subset(lumTrinotate, gene_id %in% lum.AG.list & SignalP != "NA")$gene_id)
 # EB-biased genes
 lum.EB.Contrasts=makeContrasts(EB.v.AG=lum_EB-lum_AG, EB.v.CR=lum_EB-lum_CR, EB.v.TS=lum_EB-lum_TS, levels = lum.design)
@@ -459,6 +463,7 @@ nov.lrt.AG.v.rest = glmLRT(nov.fit, contrast = nov.AG.Contrasts)
 nov.lrt.AG.v.rest.tTags = topTags(nov.lrt.AG.v.rest, n = NULL)
 nov.lrt.AG.v.rest.tTags.table = nov.lrt.AG.v.rest.tTags$table
 nov.AG.list=rownames(subset(nov.lrt.AG.v.rest.tTags.table, logFC.AG.v.CR > 2 & logFC.AG.v.EB > 2 & logFC.AG.v.TS > 2 & FDR<0.001))
+# extract candidate SFPs from AG list
 nov.SFP.list=unique(subset(novTrinotate, gene_id %in% nov.AG.list & SignalP != "NA")$gene_id)
 # EB-biased genes
 nov.EB.Contrasts=makeContrasts(EB.v.AG=nov_EB-nov_AG, EB.v.CR=nov_EB-nov_CR, EB.v.TS=nov_EB-nov_TS, levels = nov.design)
@@ -488,6 +493,7 @@ vir.lrt.AG.v.rest = glmLRT(vir.fit, contrast = vir.AG.Contrasts)
 vir.lrt.AG.v.rest.tTags = topTags(vir.lrt.AG.v.rest, n = NULL)
 vir.lrt.AG.v.rest.tTags.table = vir.lrt.AG.v.rest.tTags$table
 vir.AG.list=rownames(subset(vir.lrt.AG.v.rest.tTags.table, logFC.AG.v.CR > 2 & logFC.AG.v.EB > 2 & logFC.AG.v.TS > 2 & FDR<0.001))
+# extract candidate SFPs from AG list
 vir.SFP.list=unique(subset(virTrinotate, gene_id %in% vir.AG.list & SignalP != "NA")$gene_id)
 # EB-biased genes
 vir.EB.Contrasts=makeContrasts(EB.v.AG=vir_EB-vir_AG, EB.v.CR=vir_EB-vir_CR, EB.v.TS=vir_EB-vir_TS, levels = vir.design)
@@ -514,7 +520,7 @@ grpExpStd=calcNormFactors(grpExpStd)
 grpExpStd=estimateDisp(grpExpStd, grp.design, robust = T)
 grp.fit = glmFit(grpExpStd, grp.design)
 
-### Identify tissue-biased genes within species (>4-fold, < 0.001 FDR)
+### 1. Identify tissue-biased genes within species (>4-fold, < 0.001 FDR)
 
 ## D. americana
 # AG-biased genes
@@ -524,6 +530,7 @@ amr.dvir1.06.lrt.AG.v.rest.tTags = topTags(amr.dvir1.06.lrt.AG.v.rest, n = NULL)
 amr.dvir1.06.lrt.AG.v.rest.tTags.table = amr.dvir1.06.lrt.AG.v.rest.tTags$table
 amr.dvir1.06.AG.list=rownames(subset(amr.dvir1.06.lrt.AG.v.rest.tTags.table, logFC.AG.v.CR > 2 & logFC.AG.v.EB > 2 & logFC.AG.v.TS > 2 & FDR<0.001))
 amr.dvir1.06.AG.list.byTPM=subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% amr.dvir1.06.AG.list & amr_AG > 10 & amr_CR < 5 & amr_EB < 5 & amr_TS < 5)$FBgn_ID
+# extract candidate SFPs from AG list
 amr.dvir1.06.SFP.list=unique(subset(Annots, FBgn_ID %in% amr.dvir1.06.AG.list & SignalP == "YES")$FBgn_ID)
 # EB-biased genes
 amr.dvir1.06.EB.Contrasts=makeContrasts(EB.v.CR=amr_EB-amr_CR, EB.v.AG=amr_EB-amr_AG, EB.v.TS=amr_EB-amr_TS, levels = grp.design)
@@ -548,6 +555,7 @@ lum.dvir1.06.lrt.AG.v.rest.tTags = topTags(lum.dvir1.06.lrt.AG.v.rest, n = NULL)
 lum.dvir1.06.lrt.AG.v.rest.tTags.table = lum.dvir1.06.lrt.AG.v.rest.tTags$table
 lum.dvir1.06.AG.list=rownames(subset(lum.dvir1.06.lrt.AG.v.rest.tTags.table, logFC.AG.v.CR > 2 & logFC.AG.v.EB > 2 & logFC.AG.v.TS > 2 & FDR<0.001))
 lum.dvir1.06.AG.list.byTPM=subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% lum.dvir1.06.AG.list & lum_AG > 10 & lum_CR < 5 & lum_EB < 5 & lum_TS < 5)$FBgn_ID
+# extract candidate SFPs from AG list
 lum.dvir1.06.SFP.list=unique(subset(Annots, FBgn_ID %in% lum.dvir1.06.AG.list & SignalP == "YES")$FBgn_ID)
 # EB-biased genes
 lum.dvir1.06.EB.Contrasts=makeContrasts(EB.v.CR=lum_EB-lum_CR, EB.v.AG=lum_EB-lum_AG, EB.v.TS=lum_EB-lum_TS, levels = grp.design)
@@ -572,6 +580,7 @@ nov.dvir1.06.lrt.AG.v.rest.tTags = topTags(nov.dvir1.06.lrt.AG.v.rest, n = NULL)
 nov.dvir1.06.lrt.AG.v.rest.tTags.table = nov.dvir1.06.lrt.AG.v.rest.tTags$table
 nov.dvir1.06.AG.list=rownames(subset(nov.dvir1.06.lrt.AG.v.rest.tTags.table, logFC.AG.v.CR > 2 & logFC.AG.v.EB > 2 & logFC.AG.v.TS > 2 & FDR<0.001))
 nov.dvir1.06.AG.list.byTPM=subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% nov.dvir1.06.AG.list & nov_AG > 10 & nov_CR < 5 & nov_EB < 5 & nov_TS < 5)$FBgn_ID
+# extract candidate SFPs from AG list
 nov.dvir1.06.SFP.list=unique(subset(Annots, FBgn_ID %in% nov.dvir1.06.AG.list & SignalP == "YES")$FBgn_ID)
 # EB-biased genes
 nov.dvir1.06.EB.Contrasts=makeContrasts(EB.v.CR=nov_EB-nov_CR, EB.v.AG=nov_EB-nov_AG, EB.v.TS=nov_EB-nov_TS, levels = grp.design)
@@ -596,6 +605,7 @@ vir.dvir1.06.lrt.AG.v.rest.tTags = topTags(vir.dvir1.06.lrt.AG.v.rest, n = NULL)
 vir.dvir1.06.lrt.AG.v.rest.tTags.table = vir.dvir1.06.lrt.AG.v.rest.tTags$table
 vir.dvir1.06.AG.list=rownames(subset(vir.dvir1.06.lrt.AG.v.rest.tTags.table, logFC.AG.v.CR > 2 & logFC.AG.v.EB > 2 & logFC.AG.v.TS > 2 & FDR<0.001))
 vir.dvir1.06.AG.list.byTPM=subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% vir.dvir1.06.AG.list & vir_AG > 10 & vir_CR < 5 & vir_EB < 5 & vir_TS < 5)$FBgn_ID
+# extract candidate SFPs from AG list
 vir.dvir1.06.SFP.list=unique(subset(Annots, FBgn_ID %in% vir.dvir1.06.AG.list & SignalP == "YES")$FBgn_ID)
 # EB-biased genes
 vir.dvir1.06.EB.Contrasts=makeContrasts(EB.v.CR=vir_EB-vir_CR, EB.v.AG=vir_EB-vir_AG, EB.v.TS=vir_EB-vir_TS, levels = grp.design)
@@ -612,7 +622,7 @@ vir.dvir1.06.lrt.TS.v.rest.tTags.table = vir.dvir1.06.lrt.TS.v.rest.tTags$table
 vir.dvir1.06.TS.list=rownames(subset(vir.dvir1.06.lrt.TS.v.rest.tTags.table, logFC.TS.v.CR > 2 & logFC.TS.v.EB > 2 & logFC.TS.v.AG > 2 & FDR<0.001))
 vir.dvir1.06.TS.list.byTPM=subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% vir.dvir1.06.TS.list & vir_AG < 5 & vir_CR < 5 & vir_EB < 5 & vir_TS > 10)$FBgn_ID
 
-# Create list objects containins tissue-biased candidates by species
+# Create lists containing tissue-biased candidates by species
 AG_candidates = list(D.ame = amr.dvir1.06.AG.list, 
                       D.lum = lum.dvir1.06.AG.list, 
                       D.nov = nov.dvir1.06.AG.list, 
@@ -642,227 +652,245 @@ AG_elements = lapply(AG_combs, function(i) Setdiff(AG_candidates[i], AG_candidat
 SFP_elements = lapply(SFP_combs, function(i) Setdiff(SFP_candidates[i], SFP_candidates[setdiff(names(SFP_candidates), i)]))
 EB_elements = lapply(EB_combs, function(i) Setdiff(EB_candidates[i], EB_candidates[setdiff(names(EB_candidates), i)]))
 TS_elements = lapply(TS_combs, function(i) Setdiff(TS_candidates[i], TS_candidates[setdiff(names(TS_candidates), i)]))
-#sapply(AG_vetted_elements, length)
+#show number of each element
+sapply(AG_elements, length)
 
-
-
-### VennDiagram: This is how to draw a VennDiagram using several lists of genes
+### Draw a VennDiagram of each element
 AG_candidates_Vdiag=venn.diagram(AG_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 1.5, cat.fontface= 4, cat.cex = 1.25, resolution = 1000, main = "AG-biased")
 SFP_candidates_Vdiag=venn.diagram(SFP_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 1.5, cat.fontface= 4, cat.cex = 1.25, resolution = 1000, main = "SFP-biased")
 EB_candidates_Vdiag=venn.diagram(EB_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 1.5, cat.fontface= 4, cat.cex = 1.25, resolution = 1000, main = "EB-biased")
 TS_candidates_Vdiag=venn.diagram(TS_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 1.5, cat.fontface= 4, cat.cex = 1.25, resolution = 1000, main = "TS-biased")
 grid.arrange(gTree(children=AG_candidates_Vdiag), gTree(children =SFP_candidates_Vdiag), gTree(children=EB_candidates_Vdiag), gTree(children=TS_candidates_Vdiag), ncol=2)
 
+############################################################################
+### 2. Asses differential expression of tissue-biased genes between species.
+
+## Accessory Glands 
+crossSpecies.AG.Contrasts=makeContrasts(amr.v.lum=amr_AG-lum_AG, amr.v.nov=amr_AG-nov_AG, amr.v.vir=amr_AG-vir_AG, lum.v.nov=lum_AG-nov_AG, lum.v.vir=lum_AG-vir_AG, nov.v.vir=nov_AG-vir_AG, levels = grp.design)
+
+amr.v.lum.lrt.crossSpecies.AG.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.AG.Contrasts[,"amr.v.lum"])
+amr.v.nov.lrt.crossSpecies.AG.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.AG.Contrasts[,"amr.v.nov"])
+amr.v.vir.lrt.crossSpecies.AG.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.AG.Contrasts[,"amr.v.vir"])
+lum.v.nov.lrt.crossSpecies.AG.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.AG.Contrasts[,"lum.v.nov"])
+lum.v.vir.lrt.crossSpecies.AG.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.AG.Contrasts[,"lum.v.vir"])
+nov.v.vir.lrt.crossSpecies.AG.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.AG.Contrasts[,"nov.v.vir"])
+
+amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags = topTags(amr.v.lum.lrt.crossSpecies.AG.Contrasts, n = NULL)
+amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags = topTags(amr.v.nov.lrt.crossSpecies.AG.Contrasts, n = NULL)
+amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags = topTags(amr.v.vir.lrt.crossSpecies.AG.Contrasts, n = NULL)
+lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags = topTags(lum.v.nov.lrt.crossSpecies.AG.Contrasts, n = NULL)
+lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags = topTags(lum.v.vir.lrt.crossSpecies.AG.Contrasts, n = NULL)
+nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags = topTags(nov.v.vir.lrt.crossSpecies.AG.Contrasts, n = NULL)
+
+amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table = amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags$table
+amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table = amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags$table
+amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table = amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags$table
+lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table = lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags$table
+lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table = lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags$table
+nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table = nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags$table
+
+amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table)
+rownames(amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
+amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "amr.vs.lum"
+amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+
+amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table)
+rownames(amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
+amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "amr.vs.nov"
+amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+
+amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)
+rownames(amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
+amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "amr.vs.vir"
+amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+
+lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table)
+rownames(lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
+lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "lum.v.nov"
+lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+
+lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)
+rownames(lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
+lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "lum.vs.vir"
+lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+
+nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)
+rownames(nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
+nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "nov.vs.vir"
+nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+
+allAG.tmp = rbind(amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table, amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table, amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table, lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)
+allAG.tmp = subset(allAG.tmp, FBgn_ID %in% unlist(AG_candidates))
+
+# extract SFP genes from above tmp file
+allSFP.tmp = subset(allAG.tmp, FBgn_ID %in% unlist(SFP_candidates))
+
+## EJaculatory Bulb
+crossSpecies.EB.Contrasts=makeContrasts(amr.v.lum=amr_EB-lum_EB, amr.v.nov=amr_EB-nov_EB, amr.v.vir=amr_EB-vir_EB, lum.v.nov=lum_EB-nov_EB, lum.v.vir=lum_EB-vir_EB, nov.v.vir=nov_EB-vir_EB, levels = grp.design)
+
+amr.v.lum.lrt.crossSpecies.EB.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.EB.Contrasts[,"amr.v.lum"])
+amr.v.nov.lrt.crossSpecies.EB.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.EB.Contrasts[,"amr.v.nov"])
+amr.v.vir.lrt.crossSpecies.EB.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.EB.Contrasts[,"amr.v.vir"])
+lum.v.nov.lrt.crossSpecies.EB.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.EB.Contrasts[,"lum.v.nov"])
+lum.v.vir.lrt.crossSpecies.EB.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.EB.Contrasts[,"lum.v.vir"])
+nov.v.vir.lrt.crossSpecies.EB.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.EB.Contrasts[,"nov.v.vir"])
+
+amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags = topTags(amr.v.lum.lrt.crossSpecies.EB.Contrasts, n = NULL)
+amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags = topTags(amr.v.nov.lrt.crossSpecies.EB.Contrasts, n = NULL)
+amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags = topTags(amr.v.vir.lrt.crossSpecies.EB.Contrasts, n = NULL)
+lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags = topTags(lum.v.nov.lrt.crossSpecies.EB.Contrasts, n = NULL)
+lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags = topTags(lum.v.vir.lrt.crossSpecies.EB.Contrasts, n = NULL)
+nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags = topTags(nov.v.vir.lrt.crossSpecies.EB.Contrasts, n = NULL)
+
+amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table = amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags$table
+amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table = amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags$table
+amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table = amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags$table
+lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table = lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags$table
+lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table = lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags$table
+nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table = nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags$table
+
+amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table)
+rownames(amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
+amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "amr.vs.lum"
+amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+
+amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table)
+rownames(amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
+amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "amr.vs.nov"
+amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+
+amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)
+rownames(amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
+amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "amr.vs.vir"
+amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+
+lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table)
+rownames(lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
+lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "lum.v.nov"
+lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+
+lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)
+rownames(lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
+lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "lum.vs.vir"
+lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+
+nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)
+rownames(nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
+nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "nov.vs.vir"
+nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+
+allEB.tmp = rbind(amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table, amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table, amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table, lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table, lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table, nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)
+allEB.tmp = subset(allEB.tmp, FBgn_ID %in% unlist(EB_candidates))
+
+## Tetes 
+crossSpecies.TS.Contrasts=makeContrasts(amr.v.lum=amr_TS-lum_TS, amr.v.nov=amr_TS-nov_TS, amr.v.vir=amr_TS-vir_TS, lum.v.nov=lum_TS-nov_TS, lum.v.vir=lum_TS-vir_TS, nov.v.vir=nov_TS-vir_TS, levels = grp.design)
+
+amr.v.lum.lrt.crossSpecies.TS.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.TS.Contrasts[,"amr.v.lum"])
+amr.v.nov.lrt.crossSpecies.TS.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.TS.Contrasts[,"amr.v.nov"])
+amr.v.vir.lrt.crossSpecies.TS.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.TS.Contrasts[,"amr.v.vir"])
+lum.v.nov.lrt.crossSpecies.TS.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.TS.Contrasts[,"lum.v.nov"])
+lum.v.vir.lrt.crossSpecies.TS.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.TS.Contrasts[,"lum.v.vir"])
+nov.v.vir.lrt.crossSpecies.TS.Contrasts = glmLRT(grp.fit, contrast = crossSpecies.TS.Contrasts[,"nov.v.vir"])
+
+amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags = topTags(amr.v.lum.lrt.crossSpecies.TS.Contrasts, n = NULL)
+amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags = topTags(amr.v.nov.lrt.crossSpecies.TS.Contrasts, n = NULL)
+amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags = topTags(amr.v.vir.lrt.crossSpecies.TS.Contrasts, n = NULL)
+lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags = topTags(lum.v.nov.lrt.crossSpecies.TS.Contrasts, n = NULL)
+lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags = topTags(lum.v.vir.lrt.crossSpecies.TS.Contrasts, n = NULL)
+nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags = topTags(nov.v.vir.lrt.crossSpecies.TS.Contrasts, n = NULL)
+
+amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table = amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags$table
+amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table = amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags$table
+amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table = amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags$table
+lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table = lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags$table
+lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table = lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags$table
+nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table = nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags$table
+
+amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table)
+rownames(amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
+amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "amr.vs.lum"
+amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+
+amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table)
+rownames(amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
+amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "amr.vs.nov"
+amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+
+amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)
+rownames(amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
+amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "amr.vs.vir"
+amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+
+lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table)
+rownames(lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
+lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "lum.v.nov"
+lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+
+lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)
+rownames(lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
+lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "lum.vs.vir"
+lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+
+nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)
+rownames(nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
+nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "nov.vs.vir"
+nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+
+allTS.tmp = rbind(amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table, amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table, amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table, lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table, lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table, nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)
+allTS.tmp = subset(allTS.tmp, FBgn_ID %in% unlist(TS_candidates))
+
+#### Put it all together
+
+crossSpecies.ALL.df = rbind(allAG.tmp, allEB.tmp, allTS.tmp)
+
+crossSpecies.ALL.df$Sig = ifelse(crossSpecies.ALL.df$FDR < 0.01, "YES", "NO")
+
+ggplot(crossSpecies.ALL.df, aes(logFC, -log10(PValue), colour = Sig)) + geom_point(alpha = I(1/2)) + facet_grid(tissue~comparison, scales = "free") + geom_text_repel(data=subset(allAG.tmp, -log10(PValue) > 100), aes(label = FBgn_ID), size =3, force = 30, colour = "black")
+
+allSFP.tmp$Sig = ifelse(allSFP.tmp$FDR < 0.01, "YES", "NO")
+ggplot(allSFP.tmp, aes(logFC, -log10(PValue), colour = Sig)) + geom_point(alpha = I(1/2)) + facet_grid(tissue~comparison, scales = "free") + geom_text_repel(data=subset(allSFP.tmp, -log10(PValue) > 40), aes(label = FBgn_ID), size =3, force = 30, colour = "black")
+plotGeneG(TPMse, "FBgn0198165")
+
+#### 3d Plot (not very useful)
+plot_ly(subset(amr.lrt.crossSpecies.TS.Contrasts.tTags.table, rownames(amr.lrt.crossSpecies.TS.Contrasts.tTags.table) %in% amr.crossSpecies.TS.list), x=~logFC.amr.v.lum, y=~logFC.amr.v.nov, z=~logFC.amr.v.vir, color = ~-log10(FDR), type = "scatter3d", colors = )
+
+##############################################################################################
+##################### IDENTIFY GENES WITH LINEAGE SPECIFIC EXPRESSION ########################
+
+## Vetted  candidates
+AG_lingSpec_elements = NULL
+AG_lingSpec_elements$D.ame = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.ame & lum_AG < 5 & nov_AG < 5 & vir_AG < 5 & amr_AG > 10)$FBgn_ID)
+AG_lingSpec_elements$D.lum = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.lum & lum_AG > 10 & nov_AG < 5 & vir_AG < 5 & amr_AG < 5 )$FBgn_ID)
+AG_lingSpec_elements$D.nov = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.nov & lum_AG < 5 & nov_AG > 10 & vir_AG < 5 & amr_AG < 5 )$FBgn_ID)
+AG_lingSpec_elements$D.vir = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.vir & lum_AG < 5 & nov_AG < 5 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
+AG_lingSpec_elements$`D.ame,D.lum` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.lum` & lum_AG > 10 & nov_AG < 5 & vir_AG < 5 & amr_AG > 10 )$FBgn_ID)
+AG_lingSpec_elements$`D.ame,D.nov` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.nov` & lum_AG < 5 & nov_AG > 10 & vir_AG < 5 & amr_AG > 10 )$FBgn_ID)
+AG_lingSpec_elements$`D.ame,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.vir` & lum_AG < 5 & nov_AG < 5 & vir_AG > 10 & amr_AG > 10 )$FBgn_ID)
+AG_lingSpec_elements$`D.lum,D.nov` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.lum,D.nov` & lum_AG > 10 & nov_AG > 10 & vir_AG < 5 & amr_AG < 5 )$FBgn_ID)
+AG_lingSpec_elements$`D.lum,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.lum,D.vir` & lum_AG > 10 & nov_AG < 5 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
+AG_lingSpec_elements$`D.nov,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.nov,D.vir` & lum_AG < 5 & nov_AG > 10 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
+AG_lingSpec_elements$`D.ame,D,lum,D.nov` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D,lum,D.nov` & lum_AG > 10 & nov_AG > 10 & vir_AG < 5 & amr_AG > 10 )$FBgn_ID)
+AG_lingSpec_elements$`D.ame,D.lum,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.vir` & lum_AG > 10 & nov_AG < 5 & vir_AG > 10 & amr_AG > 10 )$FBgn_ID)
+AG_lingSpec_elements$`D.ame,D.nov,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.nov,D.vir` & lum_AG < 5 & nov_AG > 10 & vir_AG > 10 & amr_AG > 10 )$FBgn_ID)
+AG_lingSpec_elements$`D.lum,D.nov,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.lum,D.nov,D.vir` & lum_AG > 10 & nov_AG > 10 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
+AG_lingSpec_elements$`D.ame,D.lum,D.nov,D.vir` = as.character(AG_elements$`D.ame,D.lum,D.nov,D.vir`)
+
+amr_lingSpec_AG_candidates = c(AG_lingSpec_elements$D.ame, AG_lingSpec_elements$`D.ame,D.lum`, AG_lingSpec_elements$`D.ame,D.nov`, AG_lingSpec_elements$`D.ame,D.vir`, AG_lingSpec_elements$`D.ame,D,lum,D.nov`, AG_lingSpec_elements$`D.ame,D.lum,D.vir`, AG_lingSpec_elements$`D.ame,D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D.lum,D.nov,D.vir`)
+lum_lingSpec_AG_candidates = c(AG_lingSpec_elements$D.lum, AG_lingSpec_elements$`D.ame,D.lum`, AG_lingSpec_elements$`D.lum,D.nov`, AG_lingSpec_elements$`D.lum,D.vir`, AG_lingSpec_elements$`D.ame,D,lum,D.nov`, AG_lingSpec_elements$`D.ame,D.lum,D.vir`, AG_lingSpec_elements$`D.lum,D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D.lum,D.nov,D.vir`)
+nov_lingSpec_AG_candidates = c(AG_lingSpec_elements$D.nov, AG_lingSpec_elements$`D.ame,D.nov`, AG_lingSpec_elements$`D.lum,D.nov`, AG_lingSpec_elements$`D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D,lum,D.nov`, AG_lingSpec_elements$`D.ame,D.nov,D.vir`, AG_lingSpec_elements$`D.lum,D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D.lum,D.nov,D.vir`)
+vir_lingSpec_AG_candidates = c(AG_lingSpec_elements$D.vir, AG_lingSpec_elements$`D.ame,D.vir`, AG_lingSpec_elements$`D.lum,D.vir`, AG_lingSpec_elements$`D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D,lum,D.vir`, AG_lingSpec_elements$`D.ame,D.nov,D.vir`, AG_lingSpec_elements$`D.lum,D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D.lum,D.nov,D.vir`)
 
 
-## refine the candidates:
-## Vetted AG candidates
-AG_vetted_elements = NULL
-AG_vetted_elements$D.ame = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.ame & lum_AG < 5 & nov_AG < 5 & vir_AG < 5 & amr_AG > 10)$FBgn_ID)
-AG_vetted_elements$D.lum = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.lum & lum_AG > 10 & nov_AG < 5 & vir_AG < 5 & amr_AG < 5 )$FBgn_ID)
-AG_vetted_elements$D.nov = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.nov & lum_AG < 5 & nov_AG > 10 & vir_AG < 5 & amr_AG < 5 )$FBgn_ID)
-AG_vetted_elements$D.vir = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.vir & lum_AG < 5 & nov_AG < 5 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
-AG_vetted_elements$`D.ame,D.lum` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.lum` & lum_AG > 10 & nov_AG < 5 & vir_AG < 5 & amr_AG > 10 )$FBgn_ID)
-AG_vetted_elements$`D.ame,D.nov` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.nov` & lum_AG < 5 & nov_AG > 10 & vir_AG < 5 & amr_AG > 10 )$FBgn_ID)
-AG_vetted_elements$`D.ame,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.vir` & lum_AG < 5 & nov_AG < 5 & vir_AG > 10 & amr_AG > 10 )$FBgn_ID)
-AG_vetted_elements$`D.lum,D.nov` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.lum,D.nov` & lum_AG > 10 & nov_AG > 10 & vir_AG < 5 & amr_AG < 5 )$FBgn_ID)
-AG_vetted_elements$`D.lum,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.lum,D.vir` & lum_AG > 10 & nov_AG < 5 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
-AG_vetted_elements$`D.nov,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.nov,D.vir` & lum_AG < 5 & nov_AG > 10 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
-AG_vetted_elements$`D.ame,D,lum,D.nov` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D,lum,D.nov` & lum_AG > 10 & nov_AG > 10 & vir_AG < 5 & amr_AG > 10 )$FBgn_ID)
-AG_vetted_elements$`D.ame,D.lum,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.vir` & lum_AG > 10 & nov_AG < 5 & vir_AG > 10 & amr_AG > 10 )$FBgn_ID)
-AG_vetted_elements$`D.ame,D.nov,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.nov,D.vir` & lum_AG < 5 & nov_AG > 10 & vir_AG > 10 & amr_AG > 10 )$FBgn_ID)
-AG_vetted_elements$`D.lum,D.nov,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.lum,D.nov,D.vir` & lum_AG > 10 & nov_AG > 10 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
-AG_vetted_elements$`D.ame,D.lum,D.nov,D.vir` = as.character(AG_elements$`D.ame,D.lum,D.nov,D.vir`)
+lingSpec_AG_candidates = list(D.ame = amr_lingSpec_AG_candidates, 
+                             D.lum = lum_lingSpec_AG_candidates, 
+                             D.nov = nov_lingSpec_AG_candidates, 
+                             D.vir = vir_lingSpec_AG_candidates)
+lingSpec_AG_combs = unlist(lapply(1:length(lingSpec_AG_candidates), function(j) combn(names(lingSpec_AG_candidates), j, simplify = FALSE)), recursive = FALSE)
+names(lingSpec_AG_combs) = sapply(lingSpec_AG_combs, function(i) paste0(i, collapse = ","))
+lingSpec_AG_elements = lapply(lingSpec_AG_combs, function(i) Setdiff(lingSpec_AG_candidates[i], lingSpec_AG_candidates[setdiff(names(lingSpec_AG_candidates), i)]))
+lingSpec_AG_candidates_Vdiag=venn.diagram(lingSpec_AG_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 1.5, cat.fontface= 4, cat.cex = 1.25, resolution = 1000, main = "AG-biased")
+grid.arrange(gTree(children=lingSpec_AG_candidates_Vdiag))
 
-amr_vetted_AG_candidates = c(AG_vetted_elements$D.ame, AG_vetted_elements$`D.ame,D.lum`, AG_vetted_elements$`D.ame,D.nov`, AG_vetted_elements$`D.ame,D.vir`, AG_vetted_elements$`D.ame,D,lum,D.nov`, AG_vetted_elements$`D.ame,D.lum,D.vir`, AG_vetted_elements$`D.ame,D.nov,D.vir`, AG_vetted_elements$`D.ame,D.lum,D.nov,D.vir`)
-lum_vetted_AG_candidates = c(AG_vetted_elements$D.lum, AG_vetted_elements$`D.ame,D.lum`, AG_vetted_elements$`D.lum,D.nov`, AG_vetted_elements$`D.lum,D.vir`, AG_vetted_elements$`D.ame,D,lum,D.nov`, AG_vetted_elements$`D.ame,D.lum,D.vir`, AG_vetted_elements$`D.lum,D.nov,D.vir`, AG_vetted_elements$`D.ame,D.lum,D.nov,D.vir`)
-nov_vetted_AG_candidates = c(AG_vetted_elements$D.nov, AG_vetted_elements$`D.ame,D.nov`, AG_vetted_elements$`D.lum,D.nov`, AG_vetted_elements$`D.nov,D.vir`, AG_vetted_elements$`D.ame,D,lum,D.nov`, AG_vetted_elements$`D.ame,D.nov,D.vir`, AG_vetted_elements$`D.lum,D.nov,D.vir`, AG_vetted_elements$`D.ame,D.lum,D.nov,D.vir`)
-vir_vetted_AG_candidates = c(AG_vetted_elements$D.vir, AG_vetted_elements$`D.ame,D.vir`, AG_vetted_elements$`D.lum,D.vir`, AG_vetted_elements$`D.nov,D.vir`, AG_vetted_elements$`D.ame,D,lum,D.vir`, AG_vetted_elements$`D.ame,D.nov,D.vir`, AG_vetted_elements$`D.lum,D.nov,D.vir`, AG_vetted_elements$`D.ame,D.lum,D.nov,D.vir`)
-
-
-vetted_AG_candidates = list(D.ame = amr_vetted_AG_candidates, 
-                             D.lum = lum_vetted_AG_candidates, 
-                             D.nov = nov_vetted_AG_candidates, 
-                             D.vir = vir_vetted_AG_candidates)
-vetted_AG_combs = unlist(lapply(1:length(vetted_AG_candidates), function(j) combn(names(vetted_AG_candidates), j, simplify = FALSE)), recursive = FALSE)
-names(vetted_AG_combs) = sapply(vetted_AG_combs, function(i) paste0(i, collapse = ","))
-vetted_AG_elements = lapply(vetted_AG_combs, function(i) Setdiff(vetted_AG_candidates[i], vetted_AG_candidates[setdiff(names(vetted_AG_candidates), i)]))
-vetted_AG_candidates_Vdiag=venn.diagram(vetted_AG_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 1.5, cat.fontface= 4, cat.cex = 1.25, resolution = 1000, main = "AG-biased")
-grid.arrange(gTree(children=vetted_AG_candidates_Vdiag))
-
-###### Output plots
-## Dame
-# pdf("Plots/dvir1.06_AG-candidates_Dame.pdf", height = 3)
-# lapply(AG_vetted_elements$D.ame, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_AG-candidates_Dlum.pdf", height = 3)
-# lapply(AG_vetted_elements$D.lum, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_AG-candidates_Dnov.pdf", height = 3)
-# lapply(AG_vetted_elements$D.nov, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_vetted_AG-candidates_Dvir.pdf", height = 3)
-# lapply(AG_vetted_elements$D.vir, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_vetted_AG-candidates_D.ame-D.lum-D.nov-D.vir.pdf", height = 3)
-# lapply(vetted_AG_elements$`D.ame,D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# 
-## SFP candidates
-# pdf("Plots/dvir1.06_SFP-candidates_Dame.pdf", height = 3)
-# lapply(SFP_elements$D.ame, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_Dlum.pdf", height = 3)
-# lapply(SFP_elements$D.lum, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_Dnov.pdf", height = 3)
-# lapply(SFP_elements$D.nov, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_Dvir.pdf", height = 3)
-# lapply(SFP_elements$D.vir, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum.pdf", height = 3)
-# lapply(SFP_elements$`D.ame,D.lum`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.nov.pdf", height = 3)
-# lapply(SFP_elements$`D.ame,D.nov`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.vir.pdf", height = 3)
-# lapply(SFP_elements$`D.ame,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.lum-D.nov.pdf", height = 3)
-# lapply(SFP_elements$`D.lum,D.nov`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.lum-D.vir.pdf", height = 3)
-# lapply(SFP_elements$`D.lum,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.nov-D.vir.pdf", height = 3)
-# lapply(SFP_elements$`D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum-D.nov.pdf", height = 3)
-# lapply(SFP_elements$`D.ame,D.lum,D.nov`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum-D.vir.pdf", height = 3)
-# lapply(SFP_elements$`D.ame,D.lum,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.nov-D.vir.pdf", height = 3)
-# lapply(SFP_elements$`D.ame,D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.lum-D.nov-D.vir.pdf", height = 3)
-# lapply(SFP_elements$`D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_SFP-candidates_D.ame-D.lum-D.nov-D.vir.pdf", height = 3)
-# lapply(SFP_elements$`D.ame,D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-
-# ## EB candidates
-# pdf("Plots/dvir1.06_EB-candidates_Dame.pdf", height = 3)
-# lapply(EB_elements$D.ame, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_Dlum.pdf", height = 3)
-# lapply(EB_elements$D.lum, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_Dnov.pdf", height = 3)
-# lapply(EB_elements$D.nov, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_Dvir.pdf", height = 3)
-# lapply(EB_elements$D.vir, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.ame-D.lum.pdf", height = 3)
-# lapply(EB_elements$`D.ame,D.lum`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.ame-D.nov.pdf", height = 3)
-# lapply(EB_elements$`D.ame,D.nov`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.ame-D.vir.pdf", height = 3)
-# lapply(EB_elements$`D.ame,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.lum-D.nov.pdf", height = 3)
-# lapply(EB_elements$`D.lum,D.nov`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.lum-D.vir.pdf", height = 3)
-# lapply(EB_elements$`D.lum,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.nov-D.vir.pdf", height = 3)
-# lapply(EB_elements$`D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.ame-D.lum-D.nov.pdf", height = 3)
-# lapply(EB_elements$`D.ame,D.lum,D.nov`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.ame-D.lum-D.vir.pdf", height = 3)
-# lapply(EB_elements$`D.ame,D.lum,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.ame-D.nov-D.vir.pdf", height = 3)
-# lapply(EB_elements$`D.ame,D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.lum-D.nov-D.vir.pdf", height = 3)
-# lapply(EB_elements$`D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_EB-candidates_D.ame-D.lum-D.nov-D.vir.pdf", height = 3)
-# lapply(EB_elements$`D.ame,D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# 
-# 
-# ## TS candidates
-# pdf("Plots/dvir1.06_TS-candidates_Dame.pdf", height = 3)
-# lapply(TS_elements$D.ame, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_Dlum.pdf", height = 3)
-# lapply(TS_elements$D.lum, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_Dnov.pdf", height = 3)
-# lapply(TS_elements$D.nov, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_Dvir.pdf", height = 3)
-# lapply(TS_elements$D.vir, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.ame-D.lum.pdf", height = 3)
-# lapply(TS_elements$`D.ame,D.lum`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.ame-D.nov.pdf", height = 3)
-# lapply(TS_elements$`D.ame,D.nov`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.ame-D.vir.pdf", height = 3)
-# lapply(TS_elements$`D.ame,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.lum-D.nov.pdf", height = 3)
-# lapply(TS_elements$`D.lum,D.nov`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.lum-D.vir.pdf", height = 3)
-# lapply(TS_elements$`D.lum,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.nov-D.vir.pdf", height = 3)
-# lapply(TS_elements$`D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.ame-D.lum-D.nov.pdf", height = 3)
-# lapply(TS_elements$`D.ame,D.lum,D.nov`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.ame-D.lum-D.vir.pdf", height = 3)
-# lapply(TS_elements$`D.ame,D.lum,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.ame-D.nov-D.vir.pdf", height = 3)
-# lapply(TS_elements$`D.ame,D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.lum-D.nov-D.vir.pdf", height = 3)
-# lapply(TS_elements$`D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-# pdf("Plots/dvir1.06_TS-candidates_D.ame-D.lum-D.nov-D.vir.pdf", height = 3)
-# lapply(TS_elements$`D.ame,D.lum,D.nov,D.vir`, plotGeneG, object=TPMse)
-# dev.off()
-
-# 
-########################################################################
-
-
-
-##### Produce plots for SFP candidates from Trinity analysis
-# pdf("Plots/amr.SFP.list.pdf", height = 3)
-# lapply(amr.SFP.list, plotGeneT, object = TPMse_amrTrin)
-# dev.off()
-# upon inspection, the following are weak candidates: amr_c17060_g4, amr_c20147_g6, amr_c21372_g8
-amr.SFP.list = amr.SFP.list[amr.SFP.list != "amr_c17060_g4"] 
-amr.SFP.list = amr.SFP.list[amr.SFP.list != "amr_c20147_g6"] 
-amr.SFP.list = amr.SFP.list[amr.SFP.list != "amr_c21372_g8"] 
 
 
 ##### FIND De Novo Transcripts ############################################################
@@ -871,7 +899,7 @@ amr.SFP.list = amr.SFP.list[amr.SFP.list != "amr_c21372_g8"]
 ##### then checking whether orthologues exist in the other Trinity assemblies
 
 # D. americana SFPs
-selectionCols = c("dvir1.06_BlastX_topHit", "gene_id", "prot_id")
+selectionCols = c("dvir1.06_BlastX_topHit", "dvir1.06_BlastP_topHit", "gene_id", "prot_id")
 amr.SFP.dvir1.06.orths = subset(amrTrinotate, gene_id %in% amr.SFP.list)[selectionCols]
 amr.SFP.dvir1.06.orths = droplevels(amr.SFP.dvir1.06.orths)
 amr.SFP.dvir1.06.orths = amr.SFP.dvir1.06.orths[order(amr.SFP.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
@@ -882,12 +910,16 @@ amr.SFP_no_dvir1.06_hits = subset(amr.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit
 amr.SFP_no_dvir1.06_hits = unique(strsplit(amr.SFP_no_dvir1.06_hits, ", ")[[1]])
 amr.SFP_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% amr.SFP_no_dvir1.06_hits)$Gene))
 setdiff(amr.SFP_no_dvir1.06_hits, amr.SFP_no_dvir1.06_hits_Trin_hits)
+# pdf("Plots/genePlots_amr.SFP_no_dvir1.06_hits.pdf", height = 3)
+# lapply(amr.SFP_no_dvir1.06_hits, plotGeneT, object=TPMseBRR_amrTrin)
+# dev.off()
 
 # D. lummei SFPs
 lum.SFP.dvir1.06.orths = subset(lumTrinotate, gene_id %in% lum.SFP.list)[selectionCols]
 lum.SFP.dvir1.06.orths = droplevels(lum.SFP.dvir1.06.orths)
 lum.SFP.dvir1.06.orths = lum.SFP.dvir1.06.orths[order(lum.SFP.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
 lum.SFP.dvir1.06.orths[is.na(lum.SFP.dvir1.06.orths)] = "NoHit"
+lum.SFP.dvir1.06.orths = subset(lum.SFP.dvir1.06.orths, prot_id != "NoHit")
 lum.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = lum.SFP.dvir1.06.orths, toString)
 lum.SFP_no_dvir1.06_hits = subset(lum.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
 lum.SFP_no_dvir1.06_hits = unique(strsplit(lum.SFP_no_dvir1.06_hits, ", ")[[1]])
@@ -899,6 +931,7 @@ nov.SFP.dvir1.06.orths = subset(novTrinotate, gene_id %in% nov.SFP.list)[selecti
 nov.SFP.dvir1.06.orths = droplevels(nov.SFP.dvir1.06.orths)
 nov.SFP.dvir1.06.orths = nov.SFP.dvir1.06.orths[order(nov.SFP.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
 nov.SFP.dvir1.06.orths[is.na(nov.SFP.dvir1.06.orths)] = "NoHit"
+nov.SFP.dvir1.06.orths = subset(novSFP.dvir1.06.orths, prot_id != "NoHit")
 nov.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = nov.SFP.dvir1.06.orths, toString)
 nov.SFP_no_dvir1.06_hits = subset(nov.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
 nov.SFP_no_dvir1.06_hits = unique(strsplit(nov.SFP_no_dvir1.06_hits, ", ")[[1]])
@@ -910,6 +943,7 @@ vir.SFP.dvir1.06.orths = subset(virTrinotate, gene_id %in% vir.SFP.list)[selecti
 vir.SFP.dvir1.06.orths = droplevels(vir.SFP.dvir1.06.orths)
 vir.SFP.dvir1.06.orths = vir.SFP.dvir1.06.orths[order(vir.SFP.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
 vir.SFP.dvir1.06.orths[is.na(vir.SFP.dvir1.06.orths)] = "NoHit"
+vir.SFP.dvir1.06.orths = subset(vir.SFP.dvir1.06.orths, prot_id != "NoHit")
 vir.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = vir.SFP.dvir1.06.orths, toString)
 vir.SFP_no_dvir1.06_hits = subset(vir.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
 vir.SFP_no_dvir1.06_hits = unique(strsplit(vir.SFP_no_dvir1.06_hits, ", ")[[1]])
@@ -1148,39 +1182,7 @@ label.001 = subset(dataChiSq, pval<0.001)
 
 
 
-###################################################
-###################################################
-################## PAML and KaKs ##################
-tmp.FB.names = unique(subset(Annots, select=c("FBgn_ID", "FBtr_ID")))
-paml.data = read.csv(file = "PAML.Files/PAML.branchSite.ALL.results.txt", header = T, sep = "\t")
-paml.data = merge(tmp.FB.names, paml.data, all=T)
-paml.data = merge(gffRecord, paml.data, all=T)
-KaKs.data = read.csv(file = "PAML.Files/KaKs.ALL.results.txt", header = T, sep = "\t", check.names = F)
-KaKs.data$COMPARISON = paste(KaKs.data$SEQ1, KaKs.data$SEQ2, sep="-")
-KaKs.data = merge(tmp.FB.names, KaKs.data, all=T)
-KaKs.data = merge(gffRecord, KaKs.data, all=T)
-
-#### Calaculate LRT, pValues and FDR
-paml.data$Damr_LRT = 2*(paml.data$Damr_brSt_H1 - paml.data$Damr_brSt_H0)
-paml.data$Damr_pValue = pchisq(q = paml.data$Damr_LRT, df = 1, lower.tail = F)
-paml.data$Damr_FDR = p.adjust(p = paml.data$Damr_pValue, method = "fdr")
-
-paml.data$Dlum_LRT = 2*(paml.data$Dlum_brSt_H1 - paml.data$Dlum_brSt_H0)
-paml.data$Dlum_pValue = pchisq(q = paml.data$Dlum_LRT, df = 1, lower.tail = F)
-paml.data$Dlum_FDR = p.adjust(p = paml.data$Dlum_pValue, method = "fdr")
-
-paml.data$Dnov_LRT = 2*(paml.data$Dnov_brSt_H1 - paml.data$Dnov_brSt_H0)
-paml.data$Dnov_pValue = pchisq(q = paml.data$Dnov_LRT, df = 1, lower.tail = F)
-paml.data$Dnov_FDR = p.adjust(p = paml.data$Dnov_pValue, method = "fdr")
-
-paml.data$Dvir_LRT = 2*(paml.data$Dvir_brSt_H1 - paml.data$Dvir_brSt_H0)
-paml.data$Dvir_pValue = pchisq(q = paml.data$Dvir_LRT, df = 1, lower.tail = F)
-paml.data$Dvir_FDR = p.adjust(p = paml.data$Dvir_pValue, method = "fdr")
-
-paml.data$DamrNov_LRT = 2*(paml.data$DamrNov_brSt_H1 - paml.data$DamrNov_brSt_H0)
-paml.data$DamrNov_pValue = pchisq(q = paml.data$DamrNov_LRT, df = 1, lower.tail = F)
-paml.data$DamrNov_FDR = p.adjust(p = paml.data$DamrNov_pValue, method = "fdr")
-
+#
 
 #### Subset PAML data by tissue and significant brSt genes
 AG.paml.data = subset(paml.data, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.nov,D.vir`)
@@ -1311,7 +1313,7 @@ aggregate(mel_FBgn_ID~FBgn_ID, data = jointNames, toString)
 
 ###### Set up mel.Encode TPM summary
 
-mel.FBgn_ID_to_GeneSymbol= read.csv("Annotations/mel.FBgn_ID-to-GeneSymbol.txt", header = T, sep = "\t")
+mel.FBgn_ID_to_GeneSymbol= read.csv("Other.Drosophilas/Dmel/mel.FBgn_ID-to-GeneSymbol.txt", header = T, sep = "\t")
 melRPKM.tmp=melRPKM
 m.melRPKM.tmp = as.data.frame(melt(as.matrix(melRPKM.tmp)))
 m.melRPKM.tmp = within(m.melRPKM.tmp, X2=data.frame(do.call('rbind', strsplit(as.character(X2),'_',fixed=TRUE))))
