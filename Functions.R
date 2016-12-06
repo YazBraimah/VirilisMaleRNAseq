@@ -1,7 +1,7 @@
 ## Thi script loads all the required packages and several custom plotting functions
 
 ## Define required packages
-req_packages = c("bear","Biobase","cluster","cowplot","cummeRbund","data.table","DESeq","edgeR","ggplot2","ggrepel","ggthemes","GO.db","goseq","grid","gridExtra","qvalue","splitstackshape","statmod","VennDiagram")
+req_packages = c("Biobase","cluster","cowplot","cummeRbund","data.table","DESeq","edgeR","ggplot2","ggrepel","ggthemes","GO.db","goseq","grid","gridExtra","plotly","qvalue","Rmisc","splitstackshape","statmod","VennDiagram")
 
 ## Load them
 lapply(req_packages, require, character.only = TRUE)
