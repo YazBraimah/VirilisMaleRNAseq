@@ -11,7 +11,6 @@
 #################################################################################################################################################
 #################################################################################################################################################
 
-sdfs
 ## Load annotations information
 grpTrinotate = read.csv("Annotations/Trinotate_report_dvir1.06_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
 amrTrinotate = read.csv("Annotations/Trinotate_report_amrTrin3_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
