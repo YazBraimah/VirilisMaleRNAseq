@@ -653,11 +653,7 @@ EB_candidates_Vdiag=venn.diagram(EB_candidates, NULL, fill=c("#670066", "#86bd38
 TS_candidates_Vdiag=venn.diagram(TS_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 1.5, cat.fontface= 4, cat.cex = 1.25, resolution = 1000, main = "TS-biased")
 grid.arrange(gTree(children=AG_candidates_Vdiag), gTree(children =SFP_candidates_Vdiag), gTree(children=EB_candidates_Vdiag), gTree(children=TS_candidates_Vdiag), ncol=2)
 
-## write out tissue-biased transcripts for GO analysis
-# write.table(AG_elements$`D.ame,D.lum,D.nov,D.vir`, file = "GO.analysis/AG-biased_genes.list", quote = F, row.names = F, col.names = F)
-# write.table(SFP_elements$`D.ame,D.lum,D.nov,D.vir`, file = "GO.analysis/SFP-biased_genes.list", quote = F, row.names = F, col.names = F)
-# write.table(EB_elements$`D.ame,D.lum,D.nov,D.vir`, file = "GO.analysis/EB-biased_genes.list", quote = F, row.names = F, col.names = F)
-# write.table(TS_elements$`D.ame,D.lum,D.nov,D.vir`, file = "GO.analysis/TS-biased_genes.list", quote = F, row.names = F, col.names = F)
+
 
 ## refine the candidates:
 ## Vetted AG candidates
@@ -682,7 +678,7 @@ amr_vetted_AG_candidates = c(AG_vetted_elements$D.ame, AG_vetted_elements$`D.ame
 lum_vetted_AG_candidates = c(AG_vetted_elements$D.lum, AG_vetted_elements$`D.ame,D.lum`, AG_vetted_elements$`D.lum,D.nov`, AG_vetted_elements$`D.lum,D.vir`, AG_vetted_elements$`D.ame,D,lum,D.nov`, AG_vetted_elements$`D.ame,D.lum,D.vir`, AG_vetted_elements$`D.lum,D.nov,D.vir`, AG_vetted_elements$`D.ame,D.lum,D.nov,D.vir`)
 nov_vetted_AG_candidates = c(AG_vetted_elements$D.nov, AG_vetted_elements$`D.ame,D.nov`, AG_vetted_elements$`D.lum,D.nov`, AG_vetted_elements$`D.nov,D.vir`, AG_vetted_elements$`D.ame,D,lum,D.nov`, AG_vetted_elements$`D.ame,D.nov,D.vir`, AG_vetted_elements$`D.lum,D.nov,D.vir`, AG_vetted_elements$`D.ame,D.lum,D.nov,D.vir`)
 vir_vetted_AG_candidates = c(AG_vetted_elements$D.vir, AG_vetted_elements$`D.ame,D.vir`, AG_vetted_elements$`D.lum,D.vir`, AG_vetted_elements$`D.nov,D.vir`, AG_vetted_elements$`D.ame,D,lum,D.vir`, AG_vetted_elements$`D.ame,D.nov,D.vir`, AG_vetted_elements$`D.lum,D.nov,D.vir`, AG_vetted_elements$`D.ame,D.lum,D.nov,D.vir`)
-unique(amr_vetted_AG_candidates)
+
 
 vetted_AG_candidates = list(D.ame = amr_vetted_AG_candidates, 
                              D.lum = lum_vetted_AG_candidates, 
@@ -868,16 +864,105 @@ amr.SFP.list = amr.SFP.list[amr.SFP.list != "amr_c17060_g4"]
 amr.SFP.list = amr.SFP.list[amr.SFP.list != "amr_c20147_g6"] 
 amr.SFP.list = amr.SFP.list[amr.SFP.list != "amr_c21372_g8"] 
 
+
+##### FIND De Novo Transcripts ############################################################
+###########################################################################################                                           ############################# Pick up here
 ##### Here's a method to find Trinity transcript that are not found in dvir1.06 annotation,
 ##### then checking whether orthologues exist in the other Trinity assemblies
-selectionCols = c("dvir1.06_BlastX_topHit", "gene_id")
+
+# D. americana SFPs
+selectionCols = c("dvir1.06_BlastX_topHit", "gene_id", "prot_id")
 amr.SFP.dvir1.06.orths = subset(amrTrinotate, gene_id %in% amr.SFP.list)[selectionCols]
 amr.SFP.dvir1.06.orths = droplevels(amr.SFP.dvir1.06.orths)
 amr.SFP.dvir1.06.orths = amr.SFP.dvir1.06.orths[order(amr.SFP.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
 amr.SFP.dvir1.06.orths[is.na(amr.SFP.dvir1.06.orths)] = "NoHit"
+amr.SFP.dvir1.06.orths = subset(amr.SFP.dvir1.06.orths, prot_id != "NoHit")
 amr.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = amr.SFP.dvir1.06.orths, toString)
 amr.SFP_no_dvir1.06_hits = subset(amr.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
-amr.SFP_no_dvir1.06_hits = unique(strsplit(amr.SFP_no_dvir1.06_hits, ",")[[1]])
+amr.SFP_no_dvir1.06_hits = unique(strsplit(amr.SFP_no_dvir1.06_hits, ", ")[[1]])
+amr.SFP_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% amr.SFP_no_dvir1.06_hits)$Gene))
+setdiff(amr.SFP_no_dvir1.06_hits, amr.SFP_no_dvir1.06_hits_Trin_hits)
+
+# D. lummei SFPs
+lum.SFP.dvir1.06.orths = subset(lumTrinotate, gene_id %in% lum.SFP.list)[selectionCols]
+lum.SFP.dvir1.06.orths = droplevels(lum.SFP.dvir1.06.orths)
+lum.SFP.dvir1.06.orths = lum.SFP.dvir1.06.orths[order(lum.SFP.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
+lum.SFP.dvir1.06.orths[is.na(lum.SFP.dvir1.06.orths)] = "NoHit"
+lum.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = lum.SFP.dvir1.06.orths, toString)
+lum.SFP_no_dvir1.06_hits = subset(lum.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
+lum.SFP_no_dvir1.06_hits = unique(strsplit(lum.SFP_no_dvir1.06_hits, ", ")[[1]])
+lum.SFP_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% lum.SFP_no_dvir1.06_hits)$Gene))
+setdiff(lum.SFP_no_dvir1.06_hits, lum.SFP_no_dvir1.06_hits_Trin_hits)
+
+# D. novamexicana SFPs
+nov.SFP.dvir1.06.orths = subset(novTrinotate, gene_id %in% nov.SFP.list)[selectionCols]
+nov.SFP.dvir1.06.orths = droplevels(nov.SFP.dvir1.06.orths)
+nov.SFP.dvir1.06.orths = nov.SFP.dvir1.06.orths[order(nov.SFP.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
+nov.SFP.dvir1.06.orths[is.na(nov.SFP.dvir1.06.orths)] = "NoHit"
+nov.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = nov.SFP.dvir1.06.orths, toString)
+nov.SFP_no_dvir1.06_hits = subset(nov.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
+nov.SFP_no_dvir1.06_hits = unique(strsplit(nov.SFP_no_dvir1.06_hits, ", ")[[1]])
+nov.SFP_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% nov.SFP_no_dvir1.06_hits)$Gene))
+setdiff(nov.SFP_no_dvir1.06_hits, nov.SFP_no_dvir1.06_hits_Trin_hits)
+
+# D. virilis SFPs
+vir.SFP.dvir1.06.orths = subset(virTrinotate, gene_id %in% vir.SFP.list)[selectionCols]
+vir.SFP.dvir1.06.orths = droplevels(vir.SFP.dvir1.06.orths)
+vir.SFP.dvir1.06.orths = vir.SFP.dvir1.06.orths[order(vir.SFP.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
+vir.SFP.dvir1.06.orths[is.na(vir.SFP.dvir1.06.orths)] = "NoHit"
+vir.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = vir.SFP.dvir1.06.orths, toString)
+vir.SFP_no_dvir1.06_hits = subset(vir.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
+vir.SFP_no_dvir1.06_hits = unique(strsplit(vir.SFP_no_dvir1.06_hits, ", ")[[1]])
+vir.SFP_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% vir.SFP_no_dvir1.06_hits)$Gene))
+setdiff(vir.SFP_no_dvir1.06_hits, vir.SFP_no_dvir1.06_hits_Trin_hits)
+
+########################################################################
+
+# D. americana AGs
+amr.AG.dvir1.06.orths = subset(amrTrinotate, gene_id %in% amr.AG.list)[selectionCols]
+amr.AG.dvir1.06.orths = droplevels(amr.AG.dvir1.06.orths)
+amr.AG.dvir1.06.orths = amr.AG.dvir1.06.orths[order(amr.AG.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
+amr.AG.dvir1.06.orths[is.na(amr.AG.dvir1.06.orths)] = "NoHit"
+amr.AG.dvir1.06.orths = subset(amr.AG.dvir1.06.orths, prot_id != "NoHit")
+amr.AG.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = amr.AG.dvir1.06.orths, toString)
+amr.AG_no_dvir1.06_hits = subset(amr.AG.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
+amr.AG_no_dvir1.06_hits = unique(strsplit(amr.AG_no_dvir1.06_hits, ", ")[[1]])
+amr.AG_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% amr.AG_no_dvir1.06_hits)$Gene))
+tmpAGamrList = setdiff(amr.AG_no_dvir1.06_hits, amr.AG_no_dvir1.06_hits_Trin_hits)
+
+
+# D. lummei AGs
+lum.AG.dvir1.06.orths = subset(lumTrinotate, gene_id %in% lum.AG.list)[selectionCols]
+lum.AG.dvir1.06.orths = droplevels(lum.AG.dvir1.06.orths)
+lum.AG.dvir1.06.orths = lum.AG.dvir1.06.orths[order(lum.AG.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
+lum.AG.dvir1.06.orths[is.na(lum.AG.dvir1.06.orths)] = "NoHit"
+lum.AG.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = lum.AG.dvir1.06.orths, toString)
+lum.AG_no_dvir1.06_hits = subset(lum.AG.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
+lum.AG_no_dvir1.06_hits = unique(strsplit(lum.AG_no_dvir1.06_hits, ", ")[[1]])
+lum.AG_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% lum.AG_no_dvir1.06_hits)$Gene))
+setdiff(lum.AG_no_dvir1.06_hits, lum.AG_no_dvir1.06_hits_Trin_hits)
+
+# D. novamexicana AGs
+nov.AG.dvir1.06.orths = subset(novTrinotate, gene_id %in% nov.AG.list)[selectionCols]
+nov.AG.dvir1.06.orths = droplevels(nov.AG.dvir1.06.orths)
+nov.AG.dvir1.06.orths = nov.AG.dvir1.06.orths[order(nov.AG.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
+nov.AG.dvir1.06.orths[is.na(nov.AG.dvir1.06.orths)] = "NoHit"
+nov.AG.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = nov.AG.dvir1.06.orths, toString)
+nov.AG_no_dvir1.06_hits = subset(nov.AG.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
+nov.AG_no_dvir1.06_hits = unique(strsplit(nov.AG_no_dvir1.06_hits, ", ")[[1]])
+nov.AG_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% nov.AG_no_dvir1.06_hits)$Gene))
+setdiff(nov.AG_no_dvir1.06_hits, nov.AG_no_dvir1.06_hits_Trin_hits)
+
+# D. virilis AGs
+vir.AG.dvir1.06.orths = subset(virTrinotate, gene_id %in% vir.AG.list)[selectionCols]
+vir.AG.dvir1.06.orths = droplevels(vir.AG.dvir1.06.orths)
+vir.AG.dvir1.06.orths = vir.AG.dvir1.06.orths[order(vir.AG.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
+vir.AG.dvir1.06.orths[is.na(vir.AG.dvir1.06.orths)] = "NoHit"
+vir.AG.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = vir.AG.dvir1.06.orths, toString)
+vir.AG_no_dvir1.06_hits = subset(vir.AG.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
+vir.AG_no_dvir1.06_hits = unique(strsplit(vir.AG_no_dvir1.06_hits, ", ")[[1]])
+vir.AG_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% vir.AG_no_dvir1.06_hits)$Gene))
+setdiff(vir.AG_no_dvir1.06_hits, vir.AG_no_dvir1.06_hits_Trin_hits)
 
 
 ########################################################################
@@ -1060,15 +1145,11 @@ label.001 = subset(dataChiSq, pval<0.001)
 #dev.off()
 
 
-# example heatmap for gene list
-amr.tissueBiased.matrix = subset(grpMeanTPMmatrix, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir`)
-rownames(amr.tissueBiased.matrix) = amr.tissueBiased.matrix[,1]
-amr.tissueBiased.matrix[,1] = NULL
-YazHeatmap(amr.tissueBiased.matrix, clustering = "both")
 
-####### Y chromosome analyses #######
-Y.genes=as.list(read.table("Annotations/Y_Chromosome_genes.txt"))
 
+
+###################################################
+###################################################
 ################## PAML and KaKs ##################
 tmp.FB.names = unique(subset(Annots, select=c("FBgn_ID", "FBtr_ID")))
 paml.data = read.csv(file = "PAML.Files/PAML.branchSite.ALL.results.txt", header = T, sep = "\t")
@@ -1079,23 +1160,7 @@ KaKs.data$COMPARISON = paste(KaKs.data$SEQ1, KaKs.data$SEQ2, sep="-")
 KaKs.data = merge(tmp.FB.names, KaKs.data, all=T)
 KaKs.data = merge(gffRecord, KaKs.data, all=T)
 
-ggplot(subset(KaKs.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir` & Ka/Ks < 40 & grepl("Chr", chromosome)), aes(chromosome, Ka/Ks)) + geom_boxplot()
-
-TS.paml.data = subset(paml.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir`)
-TS.paml.data.sig = subset(TS.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
-TS.paml.data.sig.list = as.character(TS.paml.data.sig$FBgn_ID)
-
-AG.paml.data = subset(paml.data, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.nov,D.vir`)
-AG.paml.data.sig = subset(AG.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
-AG.paml.data.sig.list = as.character(AG.paml.data.sig$FBgn_ID)
-
-# pdf("Plots/SigBranchSite.testes_biased_genes.barPlots.pdf", height = 3)
-# lapply(TS.paml.data.sig.list, plotGeneG, object = TPMse)
-# dev.off()
-
-
-ggplot(TS.paml.data.sig, aes(min, omega)) + geom_point() + facet_grid(~chromosome)
-
+#### Calaculate LRT, pValues and FDR
 paml.data$Damr_LRT = 2*(paml.data$Damr_brSt_H1 - paml.data$Damr_brSt_H0)
 paml.data$Damr_pValue = pchisq(q = paml.data$Damr_LRT, df = 1, lower.tail = F)
 paml.data$Damr_FDR = p.adjust(p = paml.data$Damr_pValue, method = "fdr")
@@ -1115,6 +1180,32 @@ paml.data$Dvir_FDR = p.adjust(p = paml.data$Dvir_pValue, method = "fdr")
 paml.data$DamrNov_LRT = 2*(paml.data$DamrNov_brSt_H1 - paml.data$DamrNov_brSt_H0)
 paml.data$DamrNov_pValue = pchisq(q = paml.data$DamrNov_LRT, df = 1, lower.tail = F)
 paml.data$DamrNov_FDR = p.adjust(p = paml.data$DamrNov_pValue, method = "fdr")
+
+
+#### Subset PAML data by tissue and significant brSt genes
+AG.paml.data = subset(paml.data, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.nov,D.vir`)
+AG.paml.data.sig = subset(AG.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
+AG.paml.data.sig.list = as.character(AG.paml.data.sig$FBgn_ID)
+
+SFP.paml.data = subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir`)
+SFP.paml.data.sig = subset(SFP.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
+SFP.paml.data.sig.list = as.character(SFP.paml.data.sig$FBgn_ID)
+
+EB.paml.data = subset(paml.data, FBgn_ID %in% EB_elements$`D.ame,D.lum,D.nov,D.vir`)
+EB.paml.data.sig = subset(EB.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
+EB.paml.data.sig.list = as.character(EB.paml.data.sig$FBgn_ID)
+
+TS.paml.data = subset(paml.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir`)
+TS.paml.data.sig = subset(TS.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
+TS.paml.data.sig.list = as.character(TS.paml.data.sig$FBgn_ID)
+
+
+# pdf("Plots/SigBranchSite.testes_biased_genes.barPlots.pdf", height = 3)
+# lapply(TS.paml.data.sig.list, plotGeneG, object = TPMse)
+# dev.off()
+
+
+ggplot(TS.paml.data.sig, aes(min, omega)) + geom_point() + facet_grid(~chromosome)
 
 
 
@@ -1316,3 +1407,5 @@ virOrths_mojSFPs.matrix = subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% mojACPorths)
 rownames(virOrths_mojSFPs.matrix) = virOrths_mojSFPs.matrix$FBgn_ID
 virOrths_mojSFPs.matrix[,1] = NULL
 YazHeatmap(virOrths_mojSFPs.matrix, clustering = "both", labRow = T)
+
+
