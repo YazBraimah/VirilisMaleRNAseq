@@ -105,8 +105,7 @@ plotGeneMel<-function(object, gene_id, logMode=FALSE){
     geom_bar(stat = "identity", position = "dodge") + 
     facet_grid(age~sex, scales = "free") + 
     theme(axis.text.x=element_text(angle=45, vjust = 0.1)) + 
-    labs(title = paste(gene_id,", ", geneName, sep = "")) + 
-    theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
+    labs(title = paste(gene_id,", ", geneName, sep = ""))
   if (logMode)
   {
     p <- p + scale_y_log10()
