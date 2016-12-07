@@ -381,6 +381,7 @@ dvir1.06_Specificity_table = YazSpecificity(tmp.grpMeanTPMmatrix)
 dvir1.06_Specificity_table = as.data.frame(dvir1.06_Specificity_table)
 rm(tmp.grpMeanTPMmatrix)
 
+
 #############################################################################
 #############################################################################
 ############  edgeR DE analysis I: Trinity ind. species #####################
@@ -660,7 +661,29 @@ SFP_candidates_Vdiag=venn.diagram(SFP_candidates, NULL, fill=c("#670066", "#86bd
 EB_candidates_Vdiag=venn.diagram(EB_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 1.5, cat.fontface= 4, cat.cex = 1.25, resolution = 1000, main = "EB-biased")
 TS_candidates_Vdiag=venn.diagram(TS_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 1.5, cat.fontface= 4, cat.cex = 1.25, resolution = 1000, main = "TS-biased")
 grid.arrange(gTree(children=AG_candidates_Vdiag), gTree(children =SFP_candidates_Vdiag), gTree(children=EB_candidates_Vdiag), gTree(children=TS_candidates_Vdiag), ncol=2)
-
+#####################################
+## Specifity within tissue, across species
+#AG
+tmp.AG.grpMeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_AG", "lum_AG", "nov_AG", "vir_AG"))
+rownames(tmp.AG.grpMeanTPMmatrix) = tmp.AG.grpMeanTPMmatrix[,1]
+tmp.AG.grpMeanTPMmatrix[,1] = NULL
+AG.dvir1.06_Specificity_table = YazSpecificity(tmp.AG.grpMeanTPMmatrix)
+AG.dvir1.06_Specificity_table = as.data.frame(AG.dvir1.06_Specificity_table)
+rm(tmp.AG.grpMeanTPMmatrix)
+#EB
+tmp.EB.grpMeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_EB", "lum_EB", "nov_EB", "vir_EB"))
+rownames(tmp.EB.grpMeanTPMmatrix) = tmp.EB.grpMeanTPMmatrix[,1]
+tmp.EB.grpMeanTPMmatrix[,1] = NULL
+EB.dvir1.06_Specificity_table = YazSpecificity(tmp.EB.grpMeanTPMmatrix)
+EB.dvir1.06_Specificity_table = as.data.frame(EB.dvir1.06_Specificity_table)
+rm(tmp.EB.grpMeanTPMmatrix)
+#TS
+tmp.TS.grpMeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_TS", "lum_TS", "nov_TS", "vir_TS"))
+rownames(tmp.TS.grpMeanTPMmatrix) = tmp.TS.grpMeanTPMmatrix[,1]
+tmp.TS.grpMeanTPMmatrix[,1] = NULL
+TS.dvir1.06_Specificity_table = YazSpecificity(tmp.TS.grpMeanTPMmatrix)
+TS.dvir1.06_Specificity_table = as.data.frame(TS.dvir1.06_Specificity_table)
+rm(tmp.TS.grpMeanTPMmatrix)
 ############################################################################
 ### 2. Asses differential expression of tissue-biased genes between species.
 
@@ -688,41 +711,65 @@ lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table = lum.v.nov.lrt.crossSpecies
 lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table = lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags$table
 nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table = nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags$table
 
+# combine specifity data with tTag tables:
+AG.dvir1.06_Specificity_table$FBgn_ID = rownames(AG.dvir1.06_Specificity_table )
+rownames(AG.dvir1.06_Specificity_table ) = NULL
+
+# subset AG samples only
+dvir1.06_Specificity_table.amr.v.lum.samples = subset(AG.dvir1.06_Specificity_table, select=c("FBgn_ID", "amr_AG", "lum_AG"))
 amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table)
 rownames(amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
-amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "amr.vs.lum"
+amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table = merge(amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table, dvir1.06_Specificity_table.amr.v.lum.samples)
+amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "D.lum vs D.amr"
 amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+colnames(amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.amr.v.nov.samples = subset(AG.dvir1.06_Specificity_table, select=c("FBgn_ID", "amr_AG", "nov_AG"))
 amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table)
 rownames(amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
-amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "amr.vs.nov"
+amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table = merge(amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table, dvir1.06_Specificity_table.amr.v.nov.samples)
+amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "D.nov vs D.amr"
 amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+colnames(amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.amr.v.vir.samples = subset(AG.dvir1.06_Specificity_table, select=c("FBgn_ID", "amr_AG", "vir_AG"))
 amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)
 rownames(amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
-amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "amr.vs.vir"
+amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table = merge(amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, dvir1.06_Specificity_table.amr.v.vir.samples)
+amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "D.vir vs D.amr"
 amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+colnames(amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.lum.v.nov.samples = subset(AG.dvir1.06_Specificity_table, select=c("FBgn_ID", "lum_AG", "nov_AG"))
 lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table)
 rownames(lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
-lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "lum.v.nov"
+lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table = merge(lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table, dvir1.06_Specificity_table.lum.v.nov.samples)
+lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "D.nov vs. D.lum"
 lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+colnames(lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.lum.v.vir.samples = subset(AG.dvir1.06_Specificity_table, select=c("FBgn_ID", "lum_AG", "vir_AG"))
 lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)
 rownames(lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
-lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "lum.vs.vir"
+lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table = merge(lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, dvir1.06_Specificity_table.lum.v.vir.samples)
+lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "D.vir vs D.lum"
 lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+colnames(lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.nov.v.vir.samples = subset(AG.dvir1.06_Specificity_table, select=c("FBgn_ID", "nov_AG", "vir_AG"))
 nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$FBgn_ID = rownames(nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)
 rownames(nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table) = NULL
-nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "nov.vs.vir"
+nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table = merge(nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, dvir1.06_Specificity_table.nov.v.vir.samples)
+nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$comparison = "D.vir vs. D.nov"
 nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
+colnames(nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
 allAG.tmp = rbind(amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table, amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table, amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table, lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)
 allAG.tmp = subset(allAG.tmp, FBgn_ID %in% unlist(AG_candidates))
 
 # extract SFP genes from above tmp file
 allSFP.tmp = subset(allAG.tmp, FBgn_ID %in% unlist(SFP_candidates))
+allSFP.tmp$tissue = "SFPs"
 
 ## EJaculatory Bulb
 crossSpecies.EB.Contrasts=makeContrasts(amr.v.lum=amr_EB-lum_EB, amr.v.nov=amr_EB-nov_EB, amr.v.vir=amr_EB-vir_EB, lum.v.nov=lum_EB-nov_EB, lum.v.vir=lum_EB-vir_EB, nov.v.vir=nov_EB-vir_EB, levels = grp.design)
@@ -748,38 +795,63 @@ lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table = lum.v.nov.lrt.crossSpecies
 lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table = lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags$table
 nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table = nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags$table
 
+# combine specifity data with tTag tables:
+EB.dvir1.06_Specificity_table$FBgn_ID = rownames(EB.dvir1.06_Specificity_table )
+rownames(EB.dvir1.06_Specificity_table ) = NULL
+
+# subset EB samples only
+dvir1.06_Specificity_table.amr.v.lum.samples = subset(EB.dvir1.06_Specificity_table, select=c("FBgn_ID", "amr_EB", "lum_EB"))
 amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table)
 rownames(amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
-amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "amr.vs.lum"
-amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table = merge(amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table, dvir1.06_Specificity_table.amr.v.lum.samples)
+amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "D.lum vs D.amr"
+amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory bulb"
+colnames(amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.amr.v.nov.samples = subset(EB.dvir1.06_Specificity_table, select=c("FBgn_ID", "amr_EB", "nov_EB"))
 amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table)
 rownames(amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
-amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "amr.vs.nov"
-amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table = merge(amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table, dvir1.06_Specificity_table.amr.v.nov.samples)
+amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "D.nov vs D.amr"
+amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory bulb"
+colnames(amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.amr.v.vir.samples = subset(EB.dvir1.06_Specificity_table, select=c("FBgn_ID", "amr_EB", "vir_EB"))
 amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)
 rownames(amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
-amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "amr.vs.vir"
-amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table = merge(amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table, dvir1.06_Specificity_table.amr.v.vir.samples)
+amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "D.vir vs D.amr"
+amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory bulb"
+colnames(amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.lum.v.nov.samples = subset(EB.dvir1.06_Specificity_table, select=c("FBgn_ID", "lum_EB", "nov_EB"))
 lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table)
 rownames(lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
-lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "lum.v.nov"
-lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table = merge(lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table, dvir1.06_Specificity_table.lum.v.nov.samples)
+lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "D.nov vs. D.lum"
+lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory bulb"
+colnames(lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.lum.v.vir.samples = subset(EB.dvir1.06_Specificity_table, select=c("FBgn_ID", "lum_EB", "vir_EB"))
 lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)
 rownames(lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
-lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "lum.vs.vir"
-lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table = merge(lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table, dvir1.06_Specificity_table.lum.v.vir.samples)
+lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "D.vir vs D.lum"
+lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory bulb"
+colnames(lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.nov.v.vir.samples = subset(EB.dvir1.06_Specificity_table, select=c("FBgn_ID", "nov_EB", "vir_EB"))
 nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$FBgn_ID = rownames(nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)
 rownames(nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table) = NULL
-nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "nov.vs.vir"
-nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory Bulb"
+nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table = merge(nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table, dvir1.06_Specificity_table.nov.v.vir.samples)
+nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$comparison = "D.vir vs. D.nov"
+nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table$tissue = "Ejaculatory bulb"
+colnames(nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
 allEB.tmp = rbind(amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table, amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table, amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table, lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table, lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table, nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)
 allEB.tmp = subset(allEB.tmp, FBgn_ID %in% unlist(EB_candidates))
+
+
 
 ## Tetes 
 crossSpecies.TS.Contrasts=makeContrasts(amr.v.lum=amr_TS-lum_TS, amr.v.nov=amr_TS-nov_TS, amr.v.vir=amr_TS-vir_TS, lum.v.nov=lum_TS-nov_TS, lum.v.vir=lum_TS-vir_TS, nov.v.vir=nov_TS-vir_TS, levels = grp.design)
@@ -805,53 +877,81 @@ lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table = lum.v.nov.lrt.crossSpecies
 lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table = lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags$table
 nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table = nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags$table
 
+# combine specifity data with tTag tables:
+TS.dvir1.06_Specificity_table$FBgn_ID = rownames(TS.dvir1.06_Specificity_table )
+rownames(TS.dvir1.06_Specificity_table ) = NULL
+
+# subset TS samples only
+dvir1.06_Specificity_table.amr.v.lum.samples = subset(TS.dvir1.06_Specificity_table, select=c("FBgn_ID", "amr_TS", "lum_TS"))
 amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table)
 rownames(amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
-amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "amr.vs.lum"
+amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table = merge(amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table, dvir1.06_Specificity_table.amr.v.lum.samples)
+amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "D.lum vs D.amr"
 amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+colnames(amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.amr.v.nov.samples = subset(TS.dvir1.06_Specificity_table, select=c("FBgn_ID", "amr_TS", "nov_TS"))
 amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table)
 rownames(amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
-amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "amr.vs.nov"
+amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table = merge(amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table, dvir1.06_Specificity_table.amr.v.nov.samples)
+amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "D.nov vs D.amr"
 amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+colnames(amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.amr.v.vir.samples = subset(TS.dvir1.06_Specificity_table, select=c("FBgn_ID", "amr_TS", "vir_TS"))
 amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)
 rownames(amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
-amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "amr.vs.vir"
+amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table = merge(amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table, dvir1.06_Specificity_table.amr.v.vir.samples)
+amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "D.vir vs D.amr"
 amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+colnames(amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.lum.v.nov.samples = subset(TS.dvir1.06_Specificity_table, select=c("FBgn_ID", "lum_TS", "nov_TS"))
 lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table)
 rownames(lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
-lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "lum.v.nov"
+lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table = merge(lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table, dvir1.06_Specificity_table.lum.v.nov.samples)
+lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "D.nov vs. D.lum"
 lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+colnames(lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.lum.v.vir.samples = subset(TS.dvir1.06_Specificity_table, select=c("FBgn_ID", "lum_TS", "vir_TS"))
 lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)
 rownames(lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
-lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "lum.vs.vir"
+lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table = merge(lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table, dvir1.06_Specificity_table.lum.v.vir.samples)
+lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "D.vir vs D.lum"
 lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+colnames(lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
+dvir1.06_Specificity_table.nov.v.vir.samples = subset(TS.dvir1.06_Specificity_table, select=c("FBgn_ID", "nov_TS", "vir_TS"))
 nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$FBgn_ID = rownames(nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)
 rownames(nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table) = NULL
-nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "nov.vs.vir"
+nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table = merge(nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table, dvir1.06_Specificity_table.nov.v.vir.samples)
+nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$comparison = "D.vir vs. D.nov"
 nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table$tissue = "Testes"
+colnames(nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
+
 
 allTS.tmp = rbind(amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table, amr.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table, amr.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table, lum.v.nov.lrt.crossSpecies.TS.Contrasts.tTags.table, lum.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table, nov.v.vir.lrt.crossSpecies.TS.Contrasts.tTags.table)
 allTS.tmp = subset(allTS.tmp, FBgn_ID %in% unlist(TS_candidates))
 
 #### Put it all together
-
 crossSpecies.ALL.df = rbind(allAG.tmp, allEB.tmp, allTS.tmp)
 
 crossSpecies.ALL.df$Sig = ifelse(crossSpecies.ALL.df$FDR < 0.01, "YES", "NO")
 
-ggplot(crossSpecies.ALL.df, aes(logFC, -log10(PValue), colour = Sig)) + geom_point(alpha = I(1/2)) + facet_grid(tissue~comparison, scales = "free") + geom_text_repel(data=subset(allAG.tmp, -log10(PValue) > 100), aes(label = FBgn_ID), size =3, force = 30, colour = "black")
+crossSpecies.ALL.df = merge(crossSpecies.ALL.df, gffRecord)
+
+ggplot() + geom_point(data = subset(crossSpecies.ALL.df, logFC > 0), aes (logFC, -log10(PValue), colour = Sig, size = S.right), alpha = I(1/2)) + geom_point(data = subset(crossSpecies.ALL.df, logFC < 0), aes (logFC, -log10(PValue), colour = Sig, size = S.left), alpha = I(1/2)) + facet_grid(tissue~comparison, scales = "free") + geom_text_repel(data=subset(crossSpecies.ALL.df, S.left > 0.9 | S.right > 0.9), aes(logFC, -log10(PValue), label = gene_name), size =2.5, force = 30)
+
 
 allSFP.tmp$Sig = ifelse(allSFP.tmp$FDR < 0.01, "YES", "NO")
-ggplot(allSFP.tmp, aes(logFC, -log10(PValue), colour = Sig)) + geom_point(alpha = I(1/2)) + facet_grid(tissue~comparison, scales = "free") + geom_text_repel(data=subset(allSFP.tmp, -log10(PValue) > 40), aes(label = FBgn_ID), size =3, force = 30, colour = "black")
-plotGeneG(TPMse, "FBgn0198165")
+allSFPs = merge(allSFP.tmp, gffRecord)
+
+ggplot() + geom_point(data = subset(allSFPs, logFC > 0), aes (logFC, -log10(PValue), colour = Sig, size = S.right), alpha = 0.75) + geom_point(data = subset(allSFPs, logFC < 0), aes (logFC, -log10(PValue), colour = Sig, size = S.left), alpha = 0.75) + facet_grid(tissue~comparison, scales = "free") + geom_text_repel(data=subset(allSFPs, S.right > 0.75 & logFC > 2 | S.left > 0.75 & logFC < -2), aes(logFC, -log10(PValue), label = gene_name), size =2.5, force = 30) + scale_colour_manual(values = c("#718c8d", "#a8944e")) + labs(size="cross-species\nspecificity", colour="FDR < 0.01?") + scale_size(range = c(-5, 5))
+
 
 #### 3d Plot (not very useful)
-plot_ly(subset(amr.lrt.crossSpecies.TS.Contrasts.tTags.table, rownames(amr.lrt.crossSpecies.TS.Contrasts.tTags.table) %in% amr.crossSpecies.TS.list), x=~logFC.amr.v.lum, y=~logFC.amr.v.nov, z=~logFC.amr.v.vir, color = ~-log10(FDR), type = "scatter3d", colors = )
+#plot_ly(subset(amr.lrt.crossSpecies.TS.Contrasts.tTags.table, rownames(amr.lrt.crossSpecies.TS.Contrasts.tTags.table) %in% amr.crossSpecies.TS.list), x=~logFC.amr.v.lum, y=~logFC.amr.v.nov, z=~logFC.amr.v.vir, color = ~-log10(FDR), type = "scatter3d", colors = )
 
 ##############################################################################################
 ##################### IDENTIFY GENES WITH LINEAGE SPECIFIC EXPRESSION ########################
@@ -893,7 +993,7 @@ grid.arrange(gTree(children=lingSpec_AG_candidates_Vdiag))
 
 
 ##### FIND De Novo Transcripts ############################################################
-###########################################################################################                                           ############################# Pick up here
+###########################################################################################                                       
 ##### Here's a method to find Trinity transcript that are not found in dvir1.06 annotation,
 ##### then checking whether orthologues exist in the other Trinity assemblies
 
@@ -1314,15 +1414,12 @@ aggregate(mel_FBgn_ID~FBgn_ID, data = jointNames, toString)
 
 mel.FBgn_ID_to_GeneSymbol= read.csv("Other.Drosophilas/Dmel/mel.FBgn_ID-to-GeneSymbol.txt", header = T, sep = "\t")
 melRPKM.tmp=melRPKM
-m.melRPKM.tmp = as.data.frame(melt(as.matrix(melRPKM.tmp)))
-m.melRPKM.tmp = within(m.melRPKM.tmp, X2=data.frame(do.call('rbind', strsplit(as.character(X2),'_',fixed=TRUE))))
-m.melRPKM.tmp=data.frame(m.melRPKM.tmp$X1, m.melRPKM.tmp$X2$X1, m.melRPKM.tmp$X2$X2, m.melRPKM.tmp$X2$X3, m.melRPKM.tmp$X2$X4, m.melRPKM.tmp$X2$X5, m.melRPKM.tmp$value)
+m.melRPKM.tmp = as.data.frame(melt(melRPKM.tmp))
+m.melRPKM.tmp = cSplit(as.data.frame(m.melRPKM.tmp), "variable", "_")
+m.melRPKM.tmp=data.frame(m.melRPKM.tmp$mel_FBgn_ID, m.melRPKM.tmp$variable_1, m.melRPKM.tmp$variable_2, m.melRPKM.tmp$variable_3, m.melRPKM.tmp$variable_4, m.melRPKM.tmp$variable_5, m.melRPKM.tmp$value)
 colnames(m.melRPKM.tmp) = c("mel_FBgn_ID", "stage", "sex", "status", "age", "tissue", "RPKM")
 melRPKM.data = merge(m.melRPKM.tmp, mel.FBgn_ID_to_GeneSymbol, all=TRUE)
 melRPKM.data$age =factor(melRPKM.data$age, levels=c("1days","4days","5days","20days","30days"))
-#to plot on of the genes:
-ggplot(subset(melRPKM.data, mel_FBgn_ID == "FBgn0037039"), aes(tissue, as.numeric(RPKM), fill = status)) + geom_bar(stat = "identity", position = "dodge") + facet_grid(age~sex, scales = "free") + theme(axis.text.x=element_text(angle=45, vjust = 0.1))
-
 
 
 ###############################################################
