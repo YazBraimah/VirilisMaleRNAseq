@@ -1,7 +1,7 @@
 ## Thi script loads all the required packages and several custom plotting functions
 
 ## Define required packages
-req_packages = c("Biobase","cluster","cowplot","cummeRbund","data.table","DESeq","edgeR","ggplot2","ggrepel","ggthemes","GO.db","goseq","grid","gridExtra","plotly","qvalue","Rmisc","splitstackshape","statmod","VennDiagram")
+req_packages = c("Biobase","cluster","cowplot","cummeRbund","data.table","DESeq","edgeR","ggplot2","ggrepel","ggthemes","GO.db","goseq","grid","gridExtra","plotly","qvalue","reshape", "Rmisc","splitstackshape","statmod","VennDiagram")
 
 ## Load them
 lapply(req_packages, require, character.only = TRUE)
@@ -92,6 +92,30 @@ plotGeneT<-function(object, geneId, logMode=FALSE){
     p <- p + ylab("log10 TPM")
   } else {
     p <- p + ylab("TPM")
+  }
+  return(p)
+}
+
+# Plot mel gene
+plotGeneMel<-function(object, gene_id, logMode=FALSE){
+  if (grepl("FBgn", gene_id)){
+    geneName<-subset(object, mel_FBgn_ID == gene_id)$mel_GeneSymbol
+  } else {geneName<-subset(object, mel_GeneSymbol == gene_id)$mel_FBgn_ID}
+  p <- ggplot(subset(object, mel_FBgn_ID == gene_id | mel_GeneSymbol == gene_id), aes(tissue, as.numeric(RPKM), fill = status)) + 
+    geom_bar(stat = "identity", position = "dodge") + 
+    facet_grid(age~sex, scales = "free") + 
+    theme(axis.text.x=element_text(angle=45, vjust = 0.1)) + 
+    labs(title = paste(gene_id,", ", geneName, sep = "")) + 
+    theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
+  if (logMode)
+  {
+    p <- p + scale_y_log10()
+  }
+  if (logMode)
+  {
+    p <- p + ylab("log10 RPKM")
+  } else {
+    p <- p + ylab("RPKM")
   }
   return(p)
 }
