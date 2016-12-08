@@ -1,15 +1,12 @@
-#################################################################################################################################################
-#################################################################################################################################################
-#
+
+
 # __     ___      _ _ _     __  __       _      ____  _   _    _                   
 # \ \   / (_)_ __(_) (_)___|  \/  | __ _| | ___|  _ \| \ | |  / \   ___  ___  __ _ 
 #  \ \ / /| | '__| | | / __| |\/| |/ _` | |/ _ \ |_) |  \| | / _ \ / __|/ _ \/ _` |           
 #   \ V / | | |  | | | \__ \ |  | | (_| | |  __/  _ <| |\  |/ ___ \\__ \  __/ (_| |           
 #    \_/  |_|_|  |_|_|_|___/_|  |_|\__,_|_|\___|_| \_\_| \_/_/   \_\___/\___|\__, |
-#                                                                               |_|               Yasir H. Ahmed-Braimah
-# 
-#################################################################################################################################################
-#################################################################################################################################################
+#                                                                               |_|               
+#  
 
 
 ## Load annotations
@@ -404,6 +401,9 @@ virMeanTPMmatrix.BRR=cast(TPMseBRR_virTrin, trinity_id~species+tissue, value ="T
 ##########################################################
 ##########################################################
 ## Create specificity matrices (dvir1.06)
+
+# 1. within species
+#D.amr
 amr.dvir1.06.MeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_AG", "amr_CR", "amr_EB", "amr_TS"))
 tmp.amr.dvir1.06.MeanTPMmatrix = amr.dvir1.06.MeanTPMmatrix
 rownames(tmp.amr.dvir1.06.MeanTPMmatrix) = tmp.amr.dvir1.06.MeanTPMmatrix[,1]
@@ -411,7 +411,7 @@ tmp.amr.dvir1.06.MeanTPMmatrix[,1] = NULL
 amr.dvir1.06_Specificity_table = YazSpecificity(tmp.amr.dvir1.06.MeanTPMmatrix)
 amr.dvir1.06_Specificity_table = as.data.frame(amr.dvir1.06_Specificity_table)
 rm(tmp.amr.dvir1.06.MeanTPMmatrix)
-
+#D.lum
 lum.dvir1.06.MeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "lum_AG", "lum_CR", "lum_EB", "lum_TS"))
 tmp.lum.dvir1.06.MeanTPMmatrix = lum.dvir1.06.MeanTPMmatrix
 rownames(tmp.lum.dvir1.06.MeanTPMmatrix) = tmp.lum.dvir1.06.MeanTPMmatrix[,1]
@@ -419,7 +419,7 @@ tmp.lum.dvir1.06.MeanTPMmatrix[,1] = NULL
 lum.dvir1.06_Specificity_table = YazSpecificity(tmp.lum.dvir1.06.MeanTPMmatrix)
 lum.dvir1.06_Specificity_table = as.data.frame(lum.dvir1.06_Specificity_table)
 rm(tmp.lum.dvir1.06.MeanTPMmatrix)
-
+#D.nov
 nov.dvir1.06.MeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "nov_AG", "nov_CR", "nov_EB", "nov_TS"))
 tmp.nov.dvir1.06.MeanTPMmatrix = nov.dvir1.06.MeanTPMmatrix
 rownames(tmp.nov.dvir1.06.MeanTPMmatrix) = tmp.nov.dvir1.06.MeanTPMmatrix[,1]
@@ -427,7 +427,7 @@ tmp.nov.dvir1.06.MeanTPMmatrix[,1] = NULL
 nov.dvir1.06_Specificity_table = YazSpecificity(tmp.nov.dvir1.06.MeanTPMmatrix)
 nov.dvir1.06_Specificity_table = as.data.frame(nov.dvir1.06_Specificity_table)
 rm(tmp.nov.dvir1.06.MeanTPMmatrix)
-
+#D.vir
 vir.dvir1.06.MeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "vir_AG", "vir_CR", "vir_EB", "vir_TS"))
 tmp.vir.dvir1.06.MeanTPMmatrix = vir.dvir1.06.MeanTPMmatrix
 rownames(tmp.vir.dvir1.06.MeanTPMmatrix) = tmp.vir.dvir1.06.MeanTPMmatrix[,1]
@@ -436,6 +436,8 @@ vir.dvir1.06_Specificity_table = YazSpecificity(tmp.vir.dvir1.06.MeanTPMmatrix)
 vir.dvir1.06_Specificity_table = as.data.frame(vir.dvir1.06_Specificity_table)
 rm(tmp.vir.dvir1.06.MeanTPMmatrix)
 
+# 2. across species and tissues:
+#grp
 tmp.grpMeanTPMmatrix = grpMeanTPMmatrix.BRR
 rownames(tmp.grpMeanTPMmatrix) = tmp.grpMeanTPMmatrix[,1]
 tmp.grpMeanTPMmatrix[,1] = NULL
@@ -443,6 +445,28 @@ dvir1.06_Specificity_table = YazSpecificity(tmp.grpMeanTPMmatrix)
 dvir1.06_Specificity_table = as.data.frame(dvir1.06_Specificity_table)
 rm(tmp.grpMeanTPMmatrix)
 
+# 3. within tissues, across species:
+#AG
+tmp.AG.grpMeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_AG", "lum_AG", "nov_AG", "vir_AG"))
+rownames(tmp.AG.grpMeanTPMmatrix) = tmp.AG.grpMeanTPMmatrix[,1]
+tmp.AG.grpMeanTPMmatrix[,1] = NULL
+AG.dvir1.06_Specificity_table = YazSpecificity(tmp.AG.grpMeanTPMmatrix)
+AG.dvir1.06_Specificity_table = as.data.frame(AG.dvir1.06_Specificity_table)
+rm(tmp.AG.grpMeanTPMmatrix)
+#EB
+tmp.EB.grpMeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_EB", "lum_EB", "nov_EB", "vir_EB"))
+rownames(tmp.EB.grpMeanTPMmatrix) = tmp.EB.grpMeanTPMmatrix[,1]
+tmp.EB.grpMeanTPMmatrix[,1] = NULL
+EB.dvir1.06_Specificity_table = YazSpecificity(tmp.EB.grpMeanTPMmatrix)
+EB.dvir1.06_Specificity_table = as.data.frame(EB.dvir1.06_Specificity_table)
+rm(tmp.EB.grpMeanTPMmatrix)
+#TS
+tmp.TS.grpMeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_TS", "lum_TS", "nov_TS", "vir_TS"))
+rownames(tmp.TS.grpMeanTPMmatrix) = tmp.TS.grpMeanTPMmatrix[,1]
+tmp.TS.grpMeanTPMmatrix[,1] = NULL
+TS.dvir1.06_Specificity_table = YazSpecificity(tmp.TS.grpMeanTPMmatrix)
+TS.dvir1.06_Specificity_table = as.data.frame(TS.dvir1.06_Specificity_table)
+rm(tmp.TS.grpMeanTPMmatrix)
 
 #############################################################################
 #############################################################################
@@ -690,6 +714,7 @@ TS_candidates = list(D.ame = amr.dvir1.06.TS.list,
                       D.nov = nov.dvir1.06.TS.list, 
                       D.vir = vir.dvir1.06.TS.list)
 
+# Rearrange into lists of lists, and partition by species
 AG_combs = unlist(lapply(1:length(AG_candidates), function(j) combn(names(AG_candidates), j, simplify = FALSE)), recursive = FALSE)
 SFP_combs = unlist(lapply(1:length(SFP_candidates), function(j) combn(names(SFP_candidates), j, simplify = FALSE)), recursive = FALSE)
 EB_combs = unlist(lapply(1:length(EB_candidates), function(j) combn(names(EB_candidates), j, simplify = FALSE)), recursive = FALSE)
@@ -702,7 +727,8 @@ AG_elements = lapply(AG_combs, function(i) Setdiff(AG_candidates[i], AG_candidat
 SFP_elements = lapply(SFP_combs, function(i) Setdiff(SFP_candidates[i], SFP_candidates[setdiff(names(SFP_candidates), i)]))
 EB_elements = lapply(EB_combs, function(i) Setdiff(EB_candidates[i], EB_candidates[setdiff(names(EB_candidates), i)]))
 TS_elements = lapply(TS_combs, function(i) Setdiff(TS_candidates[i], TS_candidates[setdiff(names(TS_candidates), i)]))
-#show number of each element
+
+# example to show the partitioning of genes within each tissue element
 sapply(AG_elements, length)
 
 ### Draw a VennDiagram of each element
@@ -710,33 +736,13 @@ AG_candidates_Vdiag=venn.diagram(AG_candidates, NULL, fill=c("#670066", "#86bd38
 SFP_candidates_Vdiag=venn.diagram(SFP_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 0.8, cat.fontface= 4, cat.cex = 1, resolution = 1000, main = "SFPs", main.cex = 1.6)
 EB_candidates_Vdiag=venn.diagram(EB_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 0.8, cat.fontface= 4, cat.cex = 1, resolution = 1000, main = "ejac. bulb", main.cex = 1.6)
 TS_candidates_Vdiag=venn.diagram(TS_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 0.8, cat.fontface= 4, cat.cex = 1, resolution = 1000, main = "testes", main.cex = 1.6)
+
+# PLOT for 
 pdf("ManuscripPlots/Figure.S8.VennDiagram.pdf", width = 6.9, height = 4.9)
 grid.arrange(gTree(children=AG_candidates_Vdiag), gTree(children =SFP_candidates_Vdiag), gTree(children=EB_candidates_Vdiag), gTree(children=TS_candidates_Vdiag), ncol=2)
 dev.off()
 
-#####################################
-## Specifity within tissue, across species
-#AG
-tmp.AG.grpMeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_AG", "lum_AG", "nov_AG", "vir_AG"))
-rownames(tmp.AG.grpMeanTPMmatrix) = tmp.AG.grpMeanTPMmatrix[,1]
-tmp.AG.grpMeanTPMmatrix[,1] = NULL
-AG.dvir1.06_Specificity_table = YazSpecificity(tmp.AG.grpMeanTPMmatrix)
-AG.dvir1.06_Specificity_table = as.data.frame(AG.dvir1.06_Specificity_table)
-rm(tmp.AG.grpMeanTPMmatrix)
-#EB
-tmp.EB.grpMeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_EB", "lum_EB", "nov_EB", "vir_EB"))
-rownames(tmp.EB.grpMeanTPMmatrix) = tmp.EB.grpMeanTPMmatrix[,1]
-tmp.EB.grpMeanTPMmatrix[,1] = NULL
-EB.dvir1.06_Specificity_table = YazSpecificity(tmp.EB.grpMeanTPMmatrix)
-EB.dvir1.06_Specificity_table = as.data.frame(EB.dvir1.06_Specificity_table)
-rm(tmp.EB.grpMeanTPMmatrix)
-#TS
-tmp.TS.grpMeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "amr_TS", "lum_TS", "nov_TS", "vir_TS"))
-rownames(tmp.TS.grpMeanTPMmatrix) = tmp.TS.grpMeanTPMmatrix[,1]
-tmp.TS.grpMeanTPMmatrix[,1] = NULL
-TS.dvir1.06_Specificity_table = YazSpecificity(tmp.TS.grpMeanTPMmatrix)
-TS.dvir1.06_Specificity_table = as.data.frame(TS.dvir1.06_Specificity_table)
-rm(tmp.TS.grpMeanTPMmatrix)
+
 ############################################################################
 ### 2. Asses differential expression of tissue-biased genes between species.
 
@@ -819,7 +825,7 @@ colnames(nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)[7:8] = c("S.right"
 
 allAG.tmp = rbind(amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table, amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table, amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table, lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)
 allAG.tmp = subset(allAG.tmp, FBgn_ID %in% unlist(AG_candidates))
-
+allAG.tmp = subset(allAG.tmp, FBgn_ID %!in% unlist(SFP_candidates))
 # extract SFP genes from above tmp file
 allSFP.tmp = subset(allAG.tmp, FBgn_ID %in% unlist(SFP_candidates))
 allSFP.tmp$tissue = "SFPs"
@@ -988,68 +994,43 @@ allTS.tmp = rbind(amr.v.lum.lrt.crossSpecies.TS.Contrasts.tTags.table, amr.v.nov
 allTS.tmp = subset(allTS.tmp, FBgn_ID %in% unlist(TS_candidates))
 
 #### Put it all together
+# tissue-biased transcripts:
 crossSpecies.ALL.df = rbind(allAG.tmp, allEB.tmp, allTS.tmp)
-
 crossSpecies.ALL.df$Sig = ifelse(crossSpecies.ALL.df$FDR < 0.01, "YES", "NO")
-
 crossSpecies.ALL.df = merge(crossSpecies.ALL.df, gffRecord)
 
-ggplot() + geom_point(data = subset(crossSpecies.ALL.df, logFC > 0), aes (logFC, -log10(PValue), colour = Sig, size = S.right), alpha = I(1/2)) + geom_point(data = subset(crossSpecies.ALL.df, logFC < 0), aes (logFC, -log10(PValue), colour = Sig, size = S.left), alpha = I(1/2)) + facet_grid(tissue~comparison, scales = "free") + geom_text_repel(data=subset(crossSpecies.ALL.df, S.left > 0.9 | S.right > 0.9), aes(logFC, -log10(PValue), label = gene_name), size =2.5, force = 30) + scale_size(range = c(-3, 5))
+pdf("ManuscripPlots/Figure.S9.tiss-biased.volcanoPlots.pdf", width = 12, height = 6)
+ggplot() + 
+  geom_point(data = subset(crossSpecies.ALL.df, logFC > 0), aes (logFC, -log10(PValue), colour = Sig, size = S.right), alpha = 0.6) + 
+  geom_point(data = subset(crossSpecies.ALL.df, logFC < 0), aes (logFC, -log10(PValue), colour = Sig, size = S.left), alpha = 0.6) + 
+  facet_grid(tissue~comparison, scales = "free") + 
+  geom_text_repel(data=subset(crossSpecies.ALL.df, S.left > 0.75 & logFC > 2 | S.right > 0.75 & logFC > 2), aes(logFC, -log10(PValue), label = gene_name), size =2.5, force = 10, point.padding = unit(0.5, "lines"), fontface = "bold.italic") + 
+  scale_colour_manual(values = c("#88d542", "#0eacc2")) + 
+  labs(size="cross-species\nspecificity", colour="FDR < 0.01?") +
+  scale_size(range = c(-2, 2)) + 
+  ylab("-log10(p-value)") +
+  theme(axis.title.x = element_text(face = "bold", size = 12, vjust=0.1), axis.text.x=element_text(face = "bold", size = 8),axis.text.y = element_text(face = "bold", size = 12), axis.title.y = element_text(face = "bold.italic", size = 12, vjust=0.1), strip.text=element_text(face="bold.italic", size = 11))
+dev.off()
 
-
+# SFP candidates
 allSFP.tmp$Sig = ifelse(allSFP.tmp$FDR < 0.01, "YES", "NO")
 allSFPs = merge(allSFP.tmp, gffRecord)
 
+pdf("ManuscripPlots/Figure.NA.SFPs.volcanoPlots.pdf", width = 12.5, height = 2.73)
 ggplot() + 
   geom_point(data = subset(allSFPs, logFC > 0), aes (logFC, -log10(PValue), colour = Sig, size = S.right), alpha = 0.7) + 
   geom_point(data = subset(allSFPs, logFC < 0), aes (logFC, -log10(PValue), colour = Sig, size = S.left), alpha = 0.7) + 
-  facet_grid(tissue~comparison, scales = "free") + 
-  geom_text_repel(data=subset(allSFPs, S.right > 0.75 & logFC > 2 | S.left > 0.75 & logFC < -2), aes(logFC, -log10(PValue), label = gene_name), size =2.5, force = 30, fontface = "italic", colour = "black") + 
-  scale_colour_manual(values = c("#88d542", "#0eacc2")) + labs(size="cross-species\nspecificity", colour="FDR < 0.01?") + 
+  facet_grid(~comparison, scales = "free") + 
+  geom_text_repel(data=subset(allSFPs, S.right > 0.75 & logFC > 2 | S.left > 0.75 & logFC < -2), aes(logFC, -log10(PValue), label = gene_name), size =2.5, force = 30, fontface = "bold.italic", colour = "black") + 
+  scale_colour_manual(values = c("#88d542", "#0eacc2")) + 
+  labs(size="cross-species\nspecificity", colour="FDR < 0.01?") + 
   scale_size(range = c(-3, 5)) + 
   ylab("-log10(p-value)") +
-  theme(axis.title.x = element_text(face = "bold", size = 10, vjust=0.1), axis.text.x=element_text(face = "bold", size = 12),axis.text.y = element_text(face = "bold", size = 12), axis.title.y = element_text(face = "bold.italic", size = 12, vjust=0.1), strip.text=element_text(face="bold.italic", size = 12)) 
-
+  theme(axis.title.x = element_text(face = "bold", size = 12, vjust=0.1), axis.text.x=element_text(face = "bold", size = 10), axis.text.y = element_text(face = "bold", size = 10), axis.title.y = element_text(face = "bold.italic", size = 12, vjust=0.1), strip.text=element_text(face="bold.italic", size = 12)) 
+dev.off()
 
 #### 3d Plot (not very useful)
 #plot_ly(subset(amr.lrt.crossSpecies.TS.Contrasts.tTags.table, rownames(amr.lrt.crossSpecies.TS.Contrasts.tTags.table) %in% amr.crossSpecies.TS.list), x=~logFC.amr.v.lum, y=~logFC.amr.v.nov, z=~logFC.amr.v.vir, color = ~-log10(FDR), type = "scatter3d", colors = )
-
-##############################################################################################
-##################### IDENTIFY GENES WITH LINEAGE SPECIFIC EXPRESSION ########################
-
-## Vetted  candidates
-AG_lingSpec_elements = NULL
-AG_lingSpec_elements$D.ame = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.ame & lum_AG < 5 & nov_AG < 5 & vir_AG < 5 & amr_AG > 10)$FBgn_ID)
-AG_lingSpec_elements$D.lum = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.lum & lum_AG > 10 & nov_AG < 5 & vir_AG < 5 & amr_AG < 5 )$FBgn_ID)
-AG_lingSpec_elements$D.nov = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.nov & lum_AG < 5 & nov_AG > 10 & vir_AG < 5 & amr_AG < 5 )$FBgn_ID)
-AG_lingSpec_elements$D.vir = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$D.vir & lum_AG < 5 & nov_AG < 5 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
-AG_lingSpec_elements$`D.ame,D.lum` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.lum` & lum_AG > 10 & nov_AG < 5 & vir_AG < 5 & amr_AG > 10 )$FBgn_ID)
-AG_lingSpec_elements$`D.ame,D.nov` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.nov` & lum_AG < 5 & nov_AG > 10 & vir_AG < 5 & amr_AG > 10 )$FBgn_ID)
-AG_lingSpec_elements$`D.ame,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.vir` & lum_AG < 5 & nov_AG < 5 & vir_AG > 10 & amr_AG > 10 )$FBgn_ID)
-AG_lingSpec_elements$`D.lum,D.nov` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.lum,D.nov` & lum_AG > 10 & nov_AG > 10 & vir_AG < 5 & amr_AG < 5 )$FBgn_ID)
-AG_lingSpec_elements$`D.lum,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.lum,D.vir` & lum_AG > 10 & nov_AG < 5 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
-AG_lingSpec_elements$`D.nov,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.nov,D.vir` & lum_AG < 5 & nov_AG > 10 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
-AG_lingSpec_elements$`D.ame,D,lum,D.nov` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D,lum,D.nov` & lum_AG > 10 & nov_AG > 10 & vir_AG < 5 & amr_AG > 10 )$FBgn_ID)
-AG_lingSpec_elements$`D.ame,D.lum,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.vir` & lum_AG > 10 & nov_AG < 5 & vir_AG > 10 & amr_AG > 10 )$FBgn_ID)
-AG_lingSpec_elements$`D.ame,D.nov,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.ame,D.nov,D.vir` & lum_AG < 5 & nov_AG > 10 & vir_AG > 10 & amr_AG > 10 )$FBgn_ID)
-AG_lingSpec_elements$`D.lum,D.nov,D.vir` = as.character(subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% AG_elements$`D.lum,D.nov,D.vir` & lum_AG > 10 & nov_AG > 10 & vir_AG > 10 & amr_AG < 5 )$FBgn_ID)
-AG_lingSpec_elements$`D.ame,D.lum,D.nov,D.vir` = as.character(AG_elements$`D.ame,D.lum,D.nov,D.vir`)
-
-amr_lingSpec_AG_candidates = c(AG_lingSpec_elements$D.ame, AG_lingSpec_elements$`D.ame,D.lum`, AG_lingSpec_elements$`D.ame,D.nov`, AG_lingSpec_elements$`D.ame,D.vir`, AG_lingSpec_elements$`D.ame,D,lum,D.nov`, AG_lingSpec_elements$`D.ame,D.lum,D.vir`, AG_lingSpec_elements$`D.ame,D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D.lum,D.nov,D.vir`)
-lum_lingSpec_AG_candidates = c(AG_lingSpec_elements$D.lum, AG_lingSpec_elements$`D.ame,D.lum`, AG_lingSpec_elements$`D.lum,D.nov`, AG_lingSpec_elements$`D.lum,D.vir`, AG_lingSpec_elements$`D.ame,D,lum,D.nov`, AG_lingSpec_elements$`D.ame,D.lum,D.vir`, AG_lingSpec_elements$`D.lum,D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D.lum,D.nov,D.vir`)
-nov_lingSpec_AG_candidates = c(AG_lingSpec_elements$D.nov, AG_lingSpec_elements$`D.ame,D.nov`, AG_lingSpec_elements$`D.lum,D.nov`, AG_lingSpec_elements$`D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D,lum,D.nov`, AG_lingSpec_elements$`D.ame,D.nov,D.vir`, AG_lingSpec_elements$`D.lum,D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D.lum,D.nov,D.vir`)
-vir_lingSpec_AG_candidates = c(AG_lingSpec_elements$D.vir, AG_lingSpec_elements$`D.ame,D.vir`, AG_lingSpec_elements$`D.lum,D.vir`, AG_lingSpec_elements$`D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D,lum,D.vir`, AG_lingSpec_elements$`D.ame,D.nov,D.vir`, AG_lingSpec_elements$`D.lum,D.nov,D.vir`, AG_lingSpec_elements$`D.ame,D.lum,D.nov,D.vir`)
-
-
-lingSpec_AG_candidates = list(D.ame = amr_lingSpec_AG_candidates, 
-                             D.lum = lum_lingSpec_AG_candidates, 
-                             D.nov = nov_lingSpec_AG_candidates, 
-                             D.vir = vir_lingSpec_AG_candidates)
-lingSpec_AG_combs = unlist(lapply(1:length(lingSpec_AG_candidates), function(j) combn(names(lingSpec_AG_candidates), j, simplify = FALSE)), recursive = FALSE)
-names(lingSpec_AG_combs) = sapply(lingSpec_AG_combs, function(i) paste0(i, collapse = ","))
-lingSpec_AG_elements = lapply(lingSpec_AG_combs, function(i) Setdiff(lingSpec_AG_candidates[i], lingSpec_AG_candidates[setdiff(names(lingSpec_AG_candidates), i)]))
-lingSpec_AG_candidates_Vdiag=venn.diagram(lingSpec_AG_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 1.5, cat.fontface= 4, cat.cex = 1.25, resolution = 1000, main = "AG-biased")
-grid.arrange(gTree(children=lingSpec_AG_candidates_Vdiag))
 
 
 
@@ -1157,6 +1138,8 @@ vir.AG_no_dvir1.06_hits = subset(vir.AG.dvir1.06.orths, dvir1.06_BlastX_topHit =
 vir.AG_no_dvir1.06_hits = unique(strsplit(vir.AG_no_dvir1.06_hits, ", ")[[1]])
 vir.AG_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% vir.AG_no_dvir1.06_hits)$Gene))
 setdiff(vir.AG_no_dvir1.06_hits, vir.AG_no_dvir1.06_hits_Trin_hits)
+
+
 
 
 ########################################################################
@@ -1323,26 +1306,27 @@ label.05 = subset(dataChiSq, pval<0.05 & pval > 0.01)
 label.01 = subset(dataChiSq, pval<0.01 & pval > 0.001)
 label.001 = subset(dataChiSq, pval<0.001)
 
-#pdf(file = "chromDist.figure.pdf", width = 6, height = 2.8)
-(chrGG = ggplot(tissue_biased.numbers.c, aes(x=chromosome, y=obs.exp, fill=chromosome)))
-(chrGG = chrGG + geom_bar(position=position_dodge(), stat="identity"))
-(chrGG = chrGG + scale_fill_manual(values=c("#CC79A7", "#56B4E9", "#56B4E9", "#56B4E9", "#56B4E9")))
-(chrGG = chrGG + facet_wrap(~tissue, nrow = 1))
-(chrGG = chrGG + geom_errorbar(aes(ymin=obs.exp-ci, ymax=obs.exp+ci), width=.3, position=position_dodge(.9), size = 0.75))
-(chrGG = chrGG + ylab("Observed/expected number\n of genes per chromosome"))
-(chrGG = chrGG + geom_hline(yintercept = 1, colour = "black", linetype = "dashed"))
-(chrGG = chrGG + scale_x_discrete(labels=c("Chr_X" = "X", "Chr_2" = "2", "Chr_3" = "3", "Chr_4" = "4", "Chr_5" = "5")))
-(chrGG = chrGG + theme(panel.background = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_text(face = "bold", size = 14, vjust=0.1), axis.text.y = element_text(face = "bold", size = 12), legend.position="none", strip.text=element_text(face="bold", size = 12), axis.title=element_text(face="bold", size = 12)))
-(chrGG = chrGG + geom_text(data = label.05, label = "*", size = 6, colour = "red", fontface=2))
-(chrGG = chrGG + geom_text(data = label.01, label = "**", size = 6, colour = "red", fontface=2))
-(chrGG = chrGG + geom_text(data = label.001, label = "***", size = 6, colour = "red", fontface=2))
-#dev.off()
+tissue_biased.numbers.c$tissue = factor(tissue_biased.numbers.c$tissue, levels = c("SFPs", "Accessory glands", "Ejaculatory Bulb", "Testes"))
+
+pdf(file = "ManuscripPlots/Figure.NA.chromDist.pdf", width = 8.10, height = 2.4)
+ggplot(tissue_biased.numbers.c, aes(x=chromosome, y=obs.exp, fill=chromosome)) +
+  geom_bar(position=position_dodge(), stat="identity") +
+  scale_fill_manual(values=c("#CC79A7", "#56B4E9", "#56B4E9", "#56B4E9", "#56B4E9")) +
+  facet_wrap(~tissue, nrow = 1) +
+  geom_errorbar(aes(ymin=obs.exp-ci, ymax=obs.exp+ci), width=.3, position=position_dodge(.9), size = 0.75) +
+  ylab("Observed/expected number\n of genes per chromosome") +
+  geom_hline(yintercept = 1, colour = "black", linetype = "dashed") +
+  scale_x_discrete(labels=c("Chr_X" = "X", "Chr_2" = "2", "Chr_3" = "3", "Chr_4" = "4", "Chr_5" = "5")) +
+  theme(panel.background = element_blank(), axis.ticks.x = element_blank(), axis.text.x = element_text(face = "bold", size = 14, vjust=0.1), axis.text.y = element_text(face = "bold", size = 12), legend.position="none", strip.text=element_text(face="bold", size = 12), axis.title=element_text(face="bold", size = 12)) +
+  geom_text(data = label.05, label = "*", size = 6, colour = "red", fontface=2) +
+  geom_text(data = label.01, label = "**", size = 6, colour = "red", fontface=2) +
+  geom_text(data = label.001, label = "***", size = 6, colour = "red", fontface=2)
+dev.off()
 
 
-
-
-
-#
+##########################################################################################
+##########################################################################################
+##########################################################################################
 
 #### Subset PAML data by tissue and significant brSt genes
 AG.paml.data = subset(paml.data, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.nov,D.vir`)
@@ -1360,17 +1344,6 @@ EB.paml.data.sig.list = as.character(EB.paml.data.sig$FBgn_ID)
 TS.paml.data = subset(paml.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir`)
 TS.paml.data.sig = subset(TS.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
 TS.paml.data.sig.list = as.character(TS.paml.data.sig$FBgn_ID)
-
-
-# pdf("Plots/SigBranchSite.testes_biased_genes.barPlots.pdf", height = 3)
-# lapply(TS.paml.data.sig.list, plotGeneG, object = TPMse)
-# dev.off()
-
-
-ggplot(TS.paml.data.sig, aes(min, omega)) + geom_point() + facet_grid(~chromosome)
-
-
-
 
 genome.omega = subset(paml.data, omega != "NA" & omega < 100)
 genome.omega = subset(genome.omega, select=c(FBtr_ID, gene_name, chromosome, omega))
@@ -1395,7 +1368,6 @@ SFP.omega$Class = "SFPs"
 omegaData.df = rbind(genome.omega, AG.omega, EB.omega, TS.omega, SFP.omega)
 omegaData.df$Class = factor (omegaData.df$Class, levels = c("All genes", "EB biased", "testes biased", "AG biased", "SFPs"))
 
-
 genome.avg.omega = mean(subset(omegaData.df, Class == "All genes" & omega != "NA" & omega < 100)$omega)
 genome.se.omega = sd(subset(omegaData.df, Class == "All genes" & omega != "NA" & omega < 100)$omega)/sqrt(length(subset(omegaData.df, Class == "All genes" & omega != "NA" & omega < 100)$omega))
 
@@ -1411,21 +1383,72 @@ TS.se.omega = sd(subset(omegaData.df, Class == "testes biased" & omega != "NA" &
 SFP.avg.omega = mean(subset(omegaData.df, Class == "SFPs" & omega != "NA" & omega < 100)$omega)
 SFP.se.omega = sd(subset(omegaData.df, Class == "SFPs" & omega != "NA" & omega < 100)$omega)/sqrt(length(subset(omegaData.df, Class == "SFPs" & omega != "NA" & omega < 100)$omega))
 
-
 meanOmega.df=data.frame(Class = c("All", "EB", "testes", "AG", "SFPs"), omega=c(genome.avg.omega, EB.avg.omega, TS.avg.omega, AG.avg.omega, SFP.avg.omega), se = c(genome.se.omega, EB.se.omega, TS.se.omega, AG.se.omega, SFP.se.omega))
 
 meanOmega.df$Class = factor (meanOmega.df$Class, levels = c("All", "EB", "testes", "AG", "SFPs"))
 
-ggplot(meanOmega.df, aes(Class, omega, colour=Class)) + geom_point(size = 1) + geom_errorbar(aes(ymin=omega-se, ymax=omega+se), width=.1, position=position_dodge(.9)) + theme(legend.position="none")
+pdf("ManuscripPlots/Figure.NA.meanOmega.pdf", width = 4.2, height = 2.4)
+ggplot(meanOmega.df, aes(Class, omega, colour=Class)) + 
+  geom_point(size = 2) + 
+  geom_errorbar(aes(ymin=omega-se, ymax=omega+se), width=.2, position=position_dodge(.9)) + 
+  scale_colour_manual(values=c("black", "#b04fb0", "#b85516", "#f0cc35", "#647700")) + 
+  theme_bw() + 
+  theme(legend.position="none") +
+  ylab(expression(omega)) + 
+  xlab("Gene class")
+dev.off()
 
 paml.data$chromosome = factor (paml.data$chromosome, levels = c("Chr_X", "Chr_2", "Chr_3", "Chr_4", "Chr_5"))
 
-gg1=ggplot(subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` ), aes(max, omega, colour = I("#7aa457"))) + geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") + geom_point(size=2, alpha=0.75) + facet_grid(~chromosome, scales = "free_x") + geom_point(data = subset(paml.data, FBgn_ID %in% EB_elements$`D.ame,D.lum,D.nov,D.vir`& chromosome != "scaffold_12481"), aes(colour = I("#9e6ebd"))) + geom_text_repel(data=subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` & omega > 0.8), aes(label = gene_name), size =3, force = 30, colour = "black") + scale_colour_manual(name = "", values =c("#7aa457"="#7aa457","#9e6ebd"="#9e6ebd"), labels = c("SFPs","EB biased")) + scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + xlab ("Chromosome coordinates (Mb)")
+## Define PMPZ QTL regions (from Ahmed-Braimah 2016, G3)
+C2inv.qtl = data.frame(xmin=17747413.5, xmax=34500000, ymin=0, ymax = 2.5, chromosome = "Chr_2")
+C5.qtl = data.frame(xmin=c(13800000, 16300000, 22800000), xmax=c(14750000, 21700000, 25000000), ymin=0, ymax = 2.5, chromosome = "Chr_5")
 
-gg2=ggplot(subset(paml.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir` & omega < 900 & grepl("Chr", chromosome)), aes(max, omega, colour = I("#7aa457"))) + geom_point(alpha=0.55) + facet_grid(~chromosome, scale = "free_x") + scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + xlab ("Chromosome coordinates (Mb)") + scale_colour_manual(name = "", values ="#cb6751", labels = "testes biased") + scale_y_continuous(breaks=c(0.0,0.5,1.0,1.5,2.0,2.5), labels=expression("0.0", "0.5", "1.0", "1.5", "2.0", "2.5")) + geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red")
+(gg.SFP_and_EB=ggplot(subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` ), aes(max, omega, colour = I("#647700"))) + 
+  geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") + 
+  geom_point(size=2, alpha=0.75) + 
+  facet_grid(~chromosome, scales = "free_x") + 
+  geom_point(data = subset(paml.data, FBgn_ID %in% EB_elements$`D.ame,D.lum,D.nov,D.vir`& chromosome != "scaffold_12481"), aes(colour = I("#b04fb0"))) + 
+  geom_text_repel(data=subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` & omega > 0.8), aes(label = gene_name), size =3, force = 30, colour = "black") + 
+  scale_colour_manual(name = "", values =c("#647700"="#647700","#b04fb0"="#b04fb0"), labels = c("SFPs","EB biased")) + 
+  scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + 
+  xlab ("Chromosome coordinates (Mb)") +
+  ylab(expression(omega)) + 
+  geom_rect(data=C2inv.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill="red"), alpha=0.1, inherit.aes = FALSE) + 
+  geom_rect(data=C5.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="red", alpha=0.1, inherit.aes = FALSE) + 
+  scale_fill_manual(name = '', values = "red",labels = "PMPZ\nQTL region") +
+  theme_bw())
 
-pdf(file = "sample.pdf", width = 8.71, height = 3.26)
-plot_grid(gg1, gg2, ncol = 1)
+(gg.AG=ggplot(subset(paml.data, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.nov,D.vir` & omega < 900 & grepl("Chr", chromosome) & FBgn_ID %!in% SFP_elements$`D.ame,D.lum,D.nov,D.vir`), aes(max, omega, colour = I("#f0cc35"))) + 
+  geom_point(alpha=0.55) + 
+  facet_grid(~chromosome, scale = "free_x") + 
+  scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + 
+  xlab ("Chromosome coordinates (Mb)") + 
+  scale_colour_manual(name = "", values ="#f0cc35", labels = "Acc. Gl.\nbiased") + 
+  scale_y_continuous(breaks=c(0.0,0.5,1.0,1.5,2.0,2.5), labels=expression("0.0", "0.5", "1.0", "1.5", "2.0", "2.5")) + 
+  geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") +
+  ylab(expression(omega)) +
+  geom_rect(data=C2inv.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill="red"), alpha=0.1, inherit.aes = FALSE) + 
+  geom_rect(data=C5.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="red", alpha=0.1, inherit.aes = FALSE) + 
+  scale_fill_manual(name = '', values = "red",labels = "PMPZ\nQTL region") +
+  theme_bw())
+
+(gg.TS=ggplot(subset(paml.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir` & omega < 900 & grepl("Chr", chromosome)), aes(max, omega, colour = I("#b85516"))) + 
+  geom_point(alpha=0.55) + 
+  facet_grid(~chromosome, scale = "free_x") + 
+  scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + 
+  xlab ("Chromosome coordinates (Mb)") + 
+  scale_colour_manual(name = "", values ="#cb6751", labels = "Testes\nbiased") + 
+  scale_y_continuous(breaks=c(0.0,0.5,1.0,1.5,2.0,2.5), labels=expression("0.0", "0.5", "1.0", "1.5", "2.0", "2.5")) + 
+  geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") +
+  ylab(expression(omega)) +
+  geom_rect(data=C2inv.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill="red"), alpha=0.1, inherit.aes = FALSE) + 
+  geom_rect(data=C5.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="red", alpha=0.1, inherit.aes = FALSE) + 
+  scale_fill_manual(name = '', values = "red",labels = "PMPZ\nQTL region") +
+  theme_bw())
+
+pdf(file = "ManuscripPlots/Figure.NA.omegaAcrossChrs.pdf", width = 8.5, height = 5.6)
+plot_grid(gg.SFP_and_EB, gg.AG, gg.TS, ncol = 1)
 dev.off()
 
 
@@ -1433,46 +1456,7 @@ dev.off()
 ###############################################################################
 
 
-## get dvir1.06 matrix of mel_SFP orthologues
-virOrths_melSFPs_unique=as.character(unique(subset(melOrths, mel_FBgn_ID %in% melSFPs$mel_FBgn_ID)$FBgn_ID))
-virOrths_melSFPs_unique.matrix = subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% virOrths_melSFPs_unique)
-
-jointNames=subset(melOrths, mel_FBgn_ID %in% melSFPs$mel_FBgn_ID)
-melSFPs.with.virOrth.and.aggtd.vir.FBgn_ID = aggregate(mel_FBgn_ID~FBgn_ID, data = jointNames, toString)
-single_orth_table=as.data.frame(gsub(".*, ", "",melSFPs.with.virOrth.and.aggtd.vir.FBgn_ID$mel_FBgn_ID))
-jointNames = cbind(melSFPs.with.virOrth.and.aggtd.vir.FBgn_ID$FBgn_ID, single_orth_table)
-colnames(jointNames) = c("FBgn_ID", "mel_FBgn_ID")
-#jointNames$FBgn_ID=levels(droplevels(jointNames$FBgn_ID))
-melRPKM.reduced.matrix = subset(melRPKM, select =c("mel_FBgn_ID", "Adult_Male_mated_4days_AccGlnd", "Adult_Male_mated_4days_head", "Adult_Male_mated_4days_testis"))
-melSFPs.RPKM.matrix = subset(melRPKM.reduced.matrix, mel_FBgn_ID %in% jointNames$mel_FBgn_ID)
-
-tmp.melMatrix.SFPs = merge(jointNames, melSFPs.RPKM.matrix, all=TRUE)
-melMatrix.reduced.SFPs = subset(tmp.melMatrix.SFPs, Adult_Male_mated_4days_AccGlnd != "NA" & FBgn_ID != "NA")
-
-#unique(subset(somethingTmp, mel_FBgn_ID %in% melSFPs.with.virOrth.and.aggtd.vir.FBgn_ID$mel_FBgn_ID))
-
-# Heatmap using ggplot function
-virOrths_melSFPs_unique.matrix = subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% jointNames$FBgn_ID)
-rownames(virOrths_melSFPs_unique.matrix) = virOrths_melSFPs_unique.matrix$FBgn_ID
-virOrths_melSFPs_unique.matrix[,1] = NULL
-YazHeatmap(virOrths_melSFPs_unique.matrix, clustering = "both", labRow = T)
-
-#write.table(melSFPs.RPKM.matrix, file = "melSFPs.RPKM.matrix", quote = F, sep = "\t", row.names = T, col.names = T)
-
-
-colnames(melSFPs.RPKM.matrix)
-nrow(melSFPs.RPKM.matrix)
-length(melSFPs.with.virOrth.list)
-nrow(subset(melSFPs.RPKM.matrix, rownames(melSFPs.RPKM.matrix) %in% melSFPs.with.virOrth.list))
-nrow(heatmap_data)
-
-nrow(virOrths_melSFPs_unique.matrix)
-
-aggregate(mel_FBgn_ID~FBgn_ID, data = jointNames, toString)
-
-
 ###### Set up mel.Encode TPM summary
-
 mel.FBgn_ID_to_GeneSymbol= read.csv("Other.Drosophilas/Dmel/mel.FBgn_ID-to-GeneSymbol.txt", header = T, sep = "\t")
 melRPKM.tmp=melRPKM
 m.melRPKM.tmp = as.data.frame(melt(melRPKM.tmp))
@@ -1571,13 +1555,6 @@ ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-bi
 ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "TS-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat)) + geom_point(colour="#e68ca9")  + facet_grid(ontology~., scales = "free") + xlab(NULL) + geom_text_repel(data = subset(GO_enrichment_data, over_represented_FDR < 0.001 & factor == "EB-biased"), aes(term, -log10(over_represented_pvalue),label=term), force = 50, inherit.aes = F) 
 ###################
 ##################
-
-
-
-AG.elements.matrix = subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% unlist(AG_elements, use.names = F))
-rownames(AG.elements.matrix) = AG.elements.matrix$FBgn_ID
-AG.elements.matrix[,1] = NULL
-YazHeatmap(AG.elements.matrix, clustering = "both", labRow = F)
 
 
 
