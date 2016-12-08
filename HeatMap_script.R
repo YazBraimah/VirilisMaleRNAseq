@@ -26,7 +26,7 @@ names(gene_factor_row_vals) = rownames(heatmap_data)
 gene_factors_here = unique(gene_factor_row_vals)
 names(gene_factors_here) = gene_factors_here
 num_gene_factors_here = length(gene_factors_here)
-geneFactorColors = c("#2dc55b", "#b85516", "#647700", "#f0cc35")
+geneFactorColors = c("#b04fb0", "#b85516", "#647700", "#f0cc35")
 if (sum(gene_factors_here %in% sample_types) == num_gene_factors_here) {
   geneFactorColors = sample_colors[names(gene_factors_here)]
 }
@@ -78,7 +78,7 @@ names(gene_factor_row_vals) = rownames(heatmap_data)
 gene_factors_here = unique(gene_factor_row_vals)
 names(gene_factors_here) = gene_factors_here
 num_gene_factors_here = length(gene_factors_here)
-geneFactorColors = c("gray", "#f0cc35", "#647700", "#b85516", "#2dc55b")
+geneFactorColors = c("gray", "#f0cc35", "#647700", "#b85516", "#b04fb0")
 if (sum(gene_factors_here %in% sample_types) == num_gene_factors_here) {
   geneFactorColors = sample_colors[names(gene_factors_here)]
 }
