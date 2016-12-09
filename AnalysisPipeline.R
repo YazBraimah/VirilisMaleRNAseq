@@ -1331,19 +1331,19 @@ dev.off()
 #### Subset PAML data by tissue and significant brSt genes
 AG.paml.data = subset(paml.data, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.nov,D.vir`)
 AG.paml.data.sig = subset(AG.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
-AG.paml.data.sig.list = as.character(AG.paml.data.sig$FBgn_ID)
+AG.paml.data.sig.list = as.character(unique(AG.paml.data.sig$FBgn_ID))
 
 SFP.paml.data = subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir`)
 SFP.paml.data.sig = subset(SFP.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
-SFP.paml.data.sig.list = as.character(SFP.paml.data.sig$FBgn_ID)
+SFP.paml.data.sig.list = as.character(unique(SFP.paml.data.sig$FBgn_ID))
 
 EB.paml.data = subset(paml.data, FBgn_ID %in% EB_elements$`D.ame,D.lum,D.nov,D.vir`)
 EB.paml.data.sig = subset(EB.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
-EB.paml.data.sig.list = as.character(EB.paml.data.sig$FBgn_ID)
+EB.paml.data.sig.list = as.character(unique(EB.paml.data.sig$FBgn_ID))
 
 TS.paml.data = subset(paml.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir`)
 TS.paml.data.sig = subset(TS.paml.data, Damr_FDR < 0.05 | Dlum_FDR < 0.05 | Dnov_FDR < 0.05 | Dvir_FDR < 0.05)
-TS.paml.data.sig.list = as.character(TS.paml.data.sig$FBgn_ID)
+TS.paml.data.sig.list = as.character(unique(TS.paml.data.sig$FBgn_ID))
 
 genome.omega = subset(paml.data, omega != "NA" & omega < 100)
 genome.omega = subset(genome.omega, select=c(FBtr_ID, gene_name, chromosome, omega))
@@ -1550,9 +1550,9 @@ ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "SFP-b
 
 ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "AG-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(aes(category, -log10(over_represented_pvalue),label=term), force = 100, inherit.aes = F) + theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 0.5))
 
-ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(aes(category, -log10(over_represented_pvalue),label=term), force = 100, inherit.aes = F) + theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 0.5))
+ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(data=subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-biased" & numDEInCat > 10),aes(category, -log10(over_represented_pvalue),label=term), force = 10, inherit.aes = F) + theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 1, hjust = 1))
 
-ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "TS-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat)) + geom_point(colour="#e68ca9")  + facet_grid(ontology~., scales = "free") + xlab(NULL) + geom_text_repel(data = subset(GO_enrichment_data, over_represented_FDR < 0.001 & factor == "EB-biased"), aes(term, -log10(over_represented_pvalue),label=term), force = 50, inherit.aes = F) 
+ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "TS-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(data = subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "TS-biased" & numDEInCat > 200), aes(term, -log10(over_represented_pvalue),label=term), force = 50, inherit.aes = F) 
 ###################
 ##################
 
