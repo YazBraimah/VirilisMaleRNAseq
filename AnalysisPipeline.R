@@ -42,7 +42,6 @@ paml.data = read.csv(file = "PAML.Files/PAML.branchSite.ALL.results.txt", header
 paml.data = merge(tmp.FB.names, paml.data, all=T)
 paml.data = merge(gffRecord, paml.data, all=T)
 KaKs.data = read.csv(file = "PAML.Files/KaKs.ALL.results.txt", header = T, sep = "\t", check.names = F)
-KaKs.data$COMPARISON = paste(KaKs.data$SEQ1, KaKs.data$SEQ2, sep="-")
 KaKs.data = merge(tmp.FB.names, KaKs.data, all=T)
 KaKs.data = merge(gffRecord, KaKs.data, all=T)
 
@@ -1447,10 +1446,64 @@ C5.qtl = data.frame(xmin=c(13800000, 16300000, 22800000), xmax=c(14750000, 21700
   scale_fill_manual(name = '', values = "red",labels = "PMPZ\nQTL region") +
   theme_bw())
 
-pdf(file = "ManuscripPlots/Figure.NA.omegaAcrossChrs.pdf", width = 8.5, height = 5.6)
+pdf("ManuscripPlots/Figure.NA.omegaAcrossChrs.pdf", width = 8.5, height = 5.6)
 plot_grid(gg.SFP_and_EB, gg.AG, gg.TS, ncol = 1)
 dev.off()
 
+###################
+##################
+
+### PAML FDR across chromosomes
+
+SFP.subset.paml = subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir`)
+SFP.subset.paml$tissue = "SFPs"
+AG.subset.paml = subset(paml.data, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.nov,D.vir`)
+AG.subset.paml$tissue = "AG-biased"
+EB.subset.paml = subset(paml.data, FBgn_ID %in% EB_elements$`D.ame,D.lum,D.nov,D.vir`)
+EB.subset.paml$tissue = "EB-biased"
+TS.subset.paml = subset(paml.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir`)
+TS.subset.paml$tissue = "TS-biased"
+subset.paml = rbind(SFP.subset.paml, AG.subset.paml, EB.subset.paml, TS.subset.paml)
+subset.paml = subset(subset.paml, select=c("FBgn_ID","gene_name","chromosome","min","Damr_FDR","Dlum_FDR","Dnov_FDR","Dvir_FDR","tissue"))
+subset.paml.m = melt(subset.paml, id.vars = c("FBgn_ID","gene_name","chromosome","min","tissue"))  
+
+
+pdf("ManuscripPlots/Figure.NA.PAMLfdr.chrom.pdf", width = 9, height = 5)
+ggplot(subset(subset.paml.m, grepl("Chr", subset.paml.m$chromosome)), aes(min, -log10(value), colour = variable)) + 
+  geom_point(size =2, alpha=0.5) +
+  facet_grid(tissue~chromosome, scales = "free")+
+  geom_hline(yintercept = 1.3, linetype="dashed", colour = "purple") +
+  geom_text_repel(data=subset(subset.paml.m, value < 0.05& grepl("Chr", subset.paml.m$chromosome)), 
+                  aes(label = gene_name, colour = variable), size =3, force = 30) +
+  scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), 
+                     labels=expression("5", "10", "15", "20", "25", "30")) + 
+  xlab ("Chromosome coordinates (Mb)") +
+  ylab("-log10(FDR)") +
+  scale_colour_manual(values=c("#b38c3a", "#8f73c9", "#5ea46d", "#ca587a")) + 
+  theme_bw()
+dev.off()
+
+###################
+##################
+
+### pairwise Ka/Ks across chromosomes
+KaKs.data$chromosome = factor (KaKs.data$chromosome, levels = c("Chr_X", "Chr_2", "Chr_3", "Chr_4", "Chr_5"))
+
+pdf("ManuscripPlots/Figure.NA.pwKaKs.SFPs.pdf", width = 9, height = 7)
+ggplot(subset(KaKs.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` & `Ka/Ks` < 80), aes(max, `Ka/Ks`, colour = I("#647700"))) + 
+  geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") + 
+  geom_point(aes(size = `Ka/Ks`), alpha=0.75) + 
+  facet_grid(COMPARISON~chromosome, scales = "free_x") + 
+  scale_size(range=c(-1,4)) +
+  geom_text_repel(data=subset(KaKs.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` & `Ka/Ks` > 1 & `Ka/Ks` < 80), aes(label = gene_name), size =3, force = 30, colour = "black") + 
+  scale_x_continuous(breaks=seq(from=0, to=30000000, by = 5000000), labels=as.character(seq(0,30,5))) + 
+  xlab ("Chromosome coordinates (Mb)") +
+  ylab("Ka/Ks") + 
+  geom_rect(data=C2inv.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill="red"), alpha=0.1, inherit.aes = FALSE) + 
+  geom_rect(data=C5.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="red", alpha=0.1, inherit.aes = FALSE) + 
+  scale_fill_manual(name = '', values = "red",labels = "PMPZ\nQTL region") +
+  theme_bw()
+dev.off()
 
 ###############################################################################
 ###############################################################################
@@ -1541,20 +1594,27 @@ GO_enrichment_data = rbindlist(GO_enriched_list)
 
 ## plot it
 
-head(GO_enrichment_data)
-
-#GO_enrichment_data$ontology <- factor(GO_enrichment_data$ontology, levels = c("Biological Process", "Cellular Compartment", "Molecular Function"))
-
-pdf("ManuscripPlots/Figure.S9.SFP_GO.pdf", width = 7.92, height = 5.92)
-ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "SFP-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(data = subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "SFP-biased" & category != "GO:0016702" & category != "GO:0016706"), aes(category, -log10(over_represented_pvalue),label=term), force = 8, inherit.aes = F, box.padding = unit(0.35, "lines"), point.padding = unit(0.5, "lines"), fontface = "bold", size = 3) + theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 1, hjust = 1)) + scale_size(range = c(5,12)) + scale_colour_manual(values=c("#c27d92", "#a8a34b", "#8e61bf")) + scale_y_continuous(limits=c(3, 10))
+pdf("ManuscripPlots/Figure.NA.SFP_GO.pdf", width = 7.92, height = 5.92)
+ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "SFP-biased"), 
+       aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + 
+  geom_point()  + 
+  xlab(NULL) + 
+  geom_text_repel(data = subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "SFP-biased" & category != "GO:0016702" & category != "GO:0016706"), 
+                  aes(category, -log10(over_represented_pvalue),label=term), 
+                  force = 8, 
+                  inherit.aes = F, 
+                  box.padding = unit(0.35, "lines"), 
+                  point.padding = unit(0.5, "lines"), 
+                  fontface = "bold", 
+                  size = 3) + 
+  theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 1, hjust = 1)) + 
+  scale_size(range = c(5,12)) + 
+  scale_colour_manual(values=c("#c27d92", "#a8a34b", "#8e61bf")) + 
+  scale_y_continuous(limits=c(3, 10))
+dev.off()
 
 ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "AG-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(aes(category, -log10(over_represented_pvalue),label=term), force = 100, inherit.aes = F) + theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 0.5))
 
 ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(data=subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-biased" & numDEInCat > 10),aes(category, -log10(over_represented_pvalue),label=term), force = 10, inherit.aes = F) + theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 1, hjust = 1))
 
 ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "TS-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(data = subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "TS-biased" & numDEInCat > 200), aes(term, -log10(over_represented_pvalue),label=term), force = 50, inherit.aes = F) 
-###################
-##################
-
-
-
