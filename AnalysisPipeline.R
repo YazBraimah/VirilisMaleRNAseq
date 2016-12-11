@@ -1386,7 +1386,7 @@ meanOmega.df=data.frame(Class = c("All", "EB", "testes", "AG", "SFPs"), omega=c(
 
 meanOmega.df$Class = factor (meanOmega.df$Class, levels = c("All", "EB", "testes", "AG", "SFPs"))
 
-pdf("ManuscripPlots/Figure.NA.meanOmega.pdf", width = 4.2, height = 2.4)
+pdf("ManuscripPlots/Figure.NA.meanOmega.pdf", width = 4.25, height = 2.25)
 ggplot(meanOmega.df, aes(Class, omega, colour=Class)) + 
   geom_point(size = 2) + 
   geom_errorbar(aes(ymin=omega-se, ymax=omega+se), width=.2, position=position_dodge(.9)) + 
@@ -1613,8 +1613,45 @@ ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "SFP-b
   scale_y_continuous(limits=c(3, 10))
 dev.off()
 
-ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "AG-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(aes(category, -log10(over_represented_pvalue),label=term), force = 100, inherit.aes = F) + theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 0.5))
+pdf("ManuscripPlots/Figure_AG_GO.pdf", width = 5.8, height = 4.6)
+(gg_AG_GO = ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "AG-biased"), 
+       aes(category, -log10(over_represented_pvalue), 
+           size = numDEInCat, colour = ontology)) + 
+  geom_point()  + 
+  xlab(NULL) + 
+  geom_text_repel(aes(category, -log10(over_represented_pvalue),label=term), force = 100, inherit.aes = F) + 
+  scale_colour_manual(values=c("#c27d92", "#a8a34b", "#8e61bf")) +
+  ggtitle("AG-biased genes") + 
+  theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 0.5)))
+dev.off()
 
-ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(data=subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-biased" & numDEInCat > 10),aes(category, -log10(over_represented_pvalue),label=term), force = 10, inherit.aes = F) + theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 1, hjust = 1))
+pdf("ManuscripPlots/Figure_EB_GO.pdf", width = 9.7, height = 4.6)
+(gg_EB_GO = ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-biased"), 
+       aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + 
+  geom_point()  + 
+  xlab(NULL) + 
+  geom_text_repel(data=subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-biased" & numDEInCat > 10),
+                  aes(category, -log10(over_represented_pvalue),label=term), force = 10, inherit.aes = F) + 
+  scale_colour_manual(values=c("#c27d92", "#a8a34b", "#8e61bf")) +
+  ggtitle("EB-biased genes") + 
+  theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 1, hjust = 1, size =7.5)))
+dev.off()
 
-ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "TS-biased"), aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + geom_point()  + xlab(NULL) + geom_text_repel(data = subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "TS-biased" & numDEInCat > 200), aes(term, -log10(over_represented_pvalue),label=term), force = 50, inherit.aes = F) 
+# pdf("ManuscripPlots/Figure_AG_and_EB_GO.pdf", width = 15.5, height = 4.6)
+topRow = plot_grid(gg_AG_GO, gg_EB_GO, labels = c('A', 'B'), align = 'h', rel_widths = c(1, 1.73))
+# dev.off()
+
+# pdf("ManuscripPlots/Figure_TS_GO.pdf", width = 15.5, height = 4.6)
+(gg_TS_GO = ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.001 & factor == "TS-biased"), 
+       aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + 
+  geom_point()  + 
+  xlab(NULL) + 
+  geom_text_repel(data = subset(GO_enrichment_data, over_represented_FDR < 0.001 & factor == "TS-biased" & numDEInCat > 100), aes(category, -log10(over_represented_pvalue),label=term), force = 20, inherit.aes = F) +
+  scale_colour_manual(values=c("#c27d92", "#a8a34b", "#8e61bf")) +
+  scale_size(range=c(1,10)) +
+  ggtitle("Testes-biased genes") + 
+  theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 1, hjust = 1, size =7.5)))
+
+pdf("ManuscripPlots/Figure_ALL_biased_GO.pdf", width = 15.5, height = 9.4)
+plot_grid(topRow, gg_TS_GO, labels = c('', 'C'), ncol = 1)
+dev.off()
