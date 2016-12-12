@@ -10,8 +10,8 @@ lapply(req_packages, require, character.only = TRUE)
 theme_set(theme_gray())
 
 ## Load heatmap script and miscellaneous R functions (From the Trinity package)
-source("heatmap.3.R")
-source("misc_rnaseq_funcs.R")
+source("R.functions/heatmap.3.R")
+source("R.functions/misc_rnaseq_funcs.R")
 
 ### Here're several convenient plotting functions:
 
