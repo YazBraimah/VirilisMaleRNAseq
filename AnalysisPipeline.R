@@ -1020,7 +1020,7 @@ ggplot() +
   geom_point(data = subset(allSFPs, logFC > 0), aes (logFC, -log10(PValue), colour = Sig, size = S.right), alpha = 0.7) + 
   geom_point(data = subset(allSFPs, logFC < 0), aes (logFC, -log10(PValue), colour = Sig, size = S.left), alpha = 0.7) + 
   facet_grid(~comparison, scales = "free") + 
-  geom_text_repel(data=subset(allSFPs, S.right > 0.75 & logFC > 2 | S.left > 0.75 & logFC < -2), aes(logFC, -log10(PValue), label = gene_name), size =2.5, force = 30, fontface = "bold.italic", colour = "black") + 
+  geom_text_repel(data=subset(allSFPs, S.right > 0.75 & logFC > 2 | S.left > 0.75 & logFC < -2), aes(logFC, -log10(PValue), label = gene_name), size =3.5, force = 30, fontface = "bold.italic", colour = "black") + 
   scale_colour_manual(values = c("#88d542", "#0eacc2")) + 
   labs(size="cross-species\nspecificity", colour="FDR < 0.01?") + 
   scale_size(range = c(-3, 5)) + 
@@ -1655,3 +1655,15 @@ topRow = plot_grid(gg_AG_GO, gg_EB_GO, labels = c('A', 'B'), align = 'h', rel_wi
 pdf("ManuscripPlots/Figure_ALL_biased_GO.pdf", width = 15.5, height = 9.4)
 plot_grid(topRow, gg_TS_GO, labels = c('', 'C'), ncol = 1)
 dev.off()
+
+
+
+###############################
+###############################
+## output gene info
+
+EB.geneinfo = sapply(EB_elements$`D.ame,D.lum,D.nov,D.vir`, geneLookupG, complete =T)
+
+for (i in names(EB.geneinfo)){
+  write.table(EB.geneinfo[[i]], paste("GeneInfo/EB.geneInfo", i, ".txt", sep=""), quote = F, col.names = F, sep = "\t")
+}
