@@ -24,6 +24,7 @@ melOrths = read.table(file = "Other.Drosophilas/Dmel/mel_orths.txt", header = T)
 melSFPs = read.table(file = "Other.Drosophilas/Dmel/ACPlist.Findlay.20130301.txt", header = T, sep = "\t")
 melRPKM = read.table(file = "Other.Drosophilas/Dmel/mel.modEncode.RPKM.matrix", header = T, sep = "\t")
 
+
 ## Combine mel info with dvir1.06 Trinotate annotation
 melOrthsAll = aggregate(mel_GeneSymbol~FBgn_ID, data = melOrths, toString)
 Annots = merge(merge(melOrthsAll, grpTrinotate, all=TRUE), gffRecord, all=TRUE)
@@ -1662,8 +1663,22 @@ dev.off()
 ###############################
 ## output gene info
 
+## Extract gene info for each tissue-biased element
+AG.geneinfo = sapply(AG_elements$`D.ame,D.lum,D.nov,D.vir`, geneLookupG, complete =T)
+SFP.geneinfo = sapply(SFP_elements$`D.ame,D.lum,D.nov,D.vir`, geneLookupG, complete =T)
 EB.geneinfo = sapply(EB_elements$`D.ame,D.lum,D.nov,D.vir`, geneLookupG, complete =T)
+TS.geneinfo = sapply(TS_elements$`D.ame,D.lum,D.nov,D.vir`, geneLookupG, complete =T)
 
+## Output individual gene info files
+for (i in names(AG.geneinfo)){
+  write.table(AG.geneinfo[[i]], paste("GeneInfo/AG-biased/AG.", i, ".txt", sep=""), quote = F, col.names = F, sep = "\t")
+}
+for (i in names(SFP.geneinfo)){
+  write.table(SFP.geneinfo[[i]], paste("GeneInfo/SFPS/SFP.", i, ".txt", sep=""), quote = F, col.names = F, sep = "\t")
+}
 for (i in names(EB.geneinfo)){
-  write.table(EB.geneinfo[[i]], paste("GeneInfo/EB.geneInfo", i, ".txt", sep=""), quote = F, col.names = F, sep = "\t")
+  write.table(EB.geneinfo[[i]], paste("GeneInfo/EB-biased/EB.", i, ".txt", sep=""), quote = F, col.names = F, sep = "\t")
+}
+for (i in names(TS.geneinfo)){
+  write.table(TS.geneinfo[[i]], paste("GeneInfo/TS-biased/TS.", i, ".txt", sep=""), quote = F, col.names = F, sep = "\t")
 }
