@@ -1484,6 +1484,34 @@ ggplot(subset(subset.paml.m, grepl("Chr", subset.paml.m$chromosome)), aes(min, -
   theme_bw()
 dev.off()
 
+
+### PAML PValues across chromosomes
+SFP.subset.paml = subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir`)
+SFP.subset.paml$tissue = "SFPs"
+AG.subset.paml = subset(paml.data, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.nov,D.vir`)
+AG.subset.paml$tissue = "AG-biased"
+EB.subset.paml = subset(paml.data, FBgn_ID %in% EB_elements$`D.ame,D.lum,D.nov,D.vir`)
+EB.subset.paml$tissue = "EB-biased"
+TS.subset.paml = subset(paml.data, FBgn_ID %in% TS_elements$`D.ame,D.lum,D.nov,D.vir`)
+TS.subset.paml$tissue = "TS-biased"
+subset.paml = rbind(SFP.subset.paml, AG.subset.paml, EB.subset.paml, TS.subset.paml)
+subset.paml = subset(subset.paml, select=c("FBgn_ID","gene_name","chromosome","min","Damr_pValue","Dlum_pValue","Dnov_pValue","Dvir_pValue","tissue"))
+subset.paml.m = melt(subset.paml, id.vars = c("FBgn_ID","gene_name","chromosome","min","tissue"))  
+
+ggplot(subset(subset.paml.m, grepl("Chr", subset.paml.m$chromosome)), aes(min, -log10(value), colour = variable)) + 
+  geom_point(size =2, alpha=0.5) +
+  facet_grid(tissue~chromosome, scales = "free")+
+  geom_hline(yintercept = 1.3, linetype="dashed", colour = "purple") +
+  geom_text_repel(data=subset(subset.paml.m, tissue == "AG-biased" & value < 0.0001 & grepl("Chr", subset.paml.m$chromosome)),
+                  aes(label = gene_name, colour = variable), size =3, force = 30) +
+  scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), 
+                     labels=expression("5", "10", "15", "20", "25", "30")) + 
+  xlab ("Chromosome coordinates (Mb)") +
+  ylab("-log10(FDR)") +
+  scale_colour_manual(values=c("#b38c3a", "#8f73c9", "#5ea46d", "#ca587a")) + 
+  theme_bw()
+
+
 ###################
 ##################
 
