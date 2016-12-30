@@ -97,12 +97,12 @@ libSizes = as.data.frame(colSums(grpCountsMatrix))
 libSizes = cbind(sample = row.names(libSizes), libSizes)
 row.names(libSizes)= NULL
 colnames(libSizes) = c("sample", "Total_reads")
-pdf("ManuscripPlots/Figure.S1.libSizes.pdf", width = 5.5, height = 3.2)
+# pdf("ManuscripPlots/Figure.S1.libSizes.pdf", width = 5.5, height = 3.2)
 ggplot(libSizes, aes(sample, Total_reads)) + 
   geom_bar(stat="identity") + 
   theme(axis.text.x = element_text(angle = -90, hjust = 0)) + 
   geom_hline(yintercept = 20000000)
-dev.off()
+# dev.off()
 
 ## Boxplot of log10(TPM) across all samples
 m.expData=melt(as.matrix(grpTmmMatrix))
@@ -111,12 +111,12 @@ m.expData.exp= cSplit(as.data.frame(m.expData), "replicate", "_")
 m.expData=data.frame(m.expData, m.expData.exp$replicate_1, m.expData.exp$replicate_2, m.expData.exp$replicate_3)
 colnames(m.expData) = c("gene_id", "replicate", "TPM", "species", "tissue", "rep_num")
 m.expData$TPM = m.expData$TPM + 1
-pdf("ManuscripPlots/Figure.S2.expData_by_sample.pdf", width = 5.5, height = 3.7)
+# pdf("ManuscripPlots/Figure.S2.expData_by_sample.pdf", width = 5.5, height = 3.7)
 ggplot(m.expData) + 
-  geom_boxplot(aes(x = replicate, y = log10(TPM), fill = tissue, colour = species), size = 0.3, alpha = I(1/3)) + 
+  geom_boxplot(aes(x = replicate, y = log10(TPM), fill = species, colour = tissue), size = 0.3, alpha = I(1/3)) + 
   theme(axis.text.x = element_text(angle = -90, hjust = 0)) + 
   scale_fill_hue(l = 50, h.start = 200)
-dev.off()
+# dev.off()
 
  
 # ## Estimate of the number of expressed genes (Brian Haas' method)
@@ -143,9 +143,9 @@ lum_fit_plot=ggplot(lumTpmMatrix.notCrossNorm, aes(neg_min_tpm,num_features)) + 
 nov_fit_plot=ggplot(novTpmMatrix.notCrossNorm, aes(neg_min_tpm,num_features)) + geom_point() + scale_x_continuous(limits=c(-100,0)) + scale_y_continuous(limits=c(0,20000)) + geom_smooth(data=nov_filt_data, method = "lm") + geom_hline(yintercept = 13646, colour = "green") + ggtitle("novTrinity")
 vir_fit_plot=ggplot(virTpmMatrix.notCrossNorm, aes(neg_min_tpm,num_features)) + geom_point() + scale_x_continuous(limits=c(-100,0)) + scale_y_continuous(limits=c(0,20000)) + geom_smooth(data=vir_filt_data, method = "lm") + geom_hline(yintercept = 14616, colour = "green") + ggtitle("virTrinity")
 grp_fit_plot=ggplot(grpTpmMatrix.notCrossNorm, aes(neg_min_tpm,num_features)) + geom_point() + scale_x_continuous(limits=c(-100,0)) + scale_y_continuous(limits=c(0,20000)) + geom_smooth(data=grp_filt_data, method = "lm") + geom_hline(yintercept = 9474, colour = "green") + ggtitle("dvir_1.06")
-pdf("ManuscripPlots/Figure.S3.linearReg_of_expGenes.pdf", width = 5.7, height = 3.7)
+# pdf("ManuscripPlots/Figure.S3.linearReg_of_expGenes.pdf", width = 5.7, height = 3.7)
 plot_grid(amr_fit_plot, lum_fit_plot, nov_fit_plot, vir_fit_plot, grp_fit_plot,nrow = 2)
-dev.off()
+# dev.off()
 
 
 ## calculate dispersion
@@ -155,13 +155,13 @@ d = estimateCommonDisp(d)
 d = estimateTagwiseDisp(d)
 summary(d$tagwise.dispersion)
 ## Plot biological coefficient of variation
-pdf("ManuscripPlots/Figure.S4.BCV.pdf", width = 5.5, height = 3.2)
+# pdf("ManuscripPlots/Figure.S4.BCV.pdf", width = 5.5, height = 3.2)
 plotBCV(d)
-dev.off()
+# dev.off()
 ## Plot grouping of samples
-pdf("ManuscripPlots/Figure.S5.MDS.pdf", width = 6.5, height = 5.6)
+# pdf("ManuscripPlots/Figure.S5.MDS.pdf", width = 6.5, height = 5.6)
 plotMDS(d, method = "bcv", col=as.numeric(d$samples$group))
-dev.off()
+# dev.off()
 
 ## Plot sample correlation
 data = log2(grpCountsMatrix+1)
@@ -169,9 +169,9 @@ data = as.matrix(data)
 sample_cor = cor(data, method='pearson', use='pairwise.complete.obs')
 sample_dist = as.dist(1-sample_cor)
 hc_samples = hclust(sample_dist, method='complete')
-pdf("ManuscripPlots/Figure.S6.sampleCorr.pdf", width = 8.6, height = 7.8)
+# pdf("ManuscripPlots/Figure.S6.sampleCorr.pdf", width = 8.6, height = 7.8)
 heatmap.3(sample_cor, dendrogram='both', Rowv=as.dendrogram(hc_samples), Colv=as.dendrogram(hc_samples), col = colorpanel(75, '#dd70cd','black','#afc64f'), scale='none', symm=TRUE, key=TRUE,density.info='none', trace='none', symkey=FALSE, symbreaks=F, margins=c(10,10), cexCol=0.8, cexRow=0.8, cex.main=1.8, main=paste("sample correlation matrix\n(all replicates)"))
-dev.off()
+# dev.off()
 
 # normalize by DESeq method:
 meta = data.frame(row.names=colnames(grpCountsMatrix), condition=grpSamples_data$V1)
@@ -188,9 +188,9 @@ amr.EB.1_vs_amr.EB.2 = MA_BPlot(grpCountData_normByDESeq, "amr_EB_1", "amr_EB_2"
 amr.TS.1_vs_amr.TS.2 = MA_BPlot(grpCountData_normByDESeq, "amr_TS_1", "amr_TS_2")
 amr.TS.1_vs_amr.TS.3 = MA_BPlot(grpCountData_normByDESeq, "amr_TS_1", "amr_TS_3")
 amr.TS.2_vs_amr.TS.3 = MA_BPlot(grpCountData_normByDESeq, "amr_TS_2", "amr_TS_3")
-pdf("ManuscripPlots/Figure.S7a.crossRep.Damr.pdf", width = 16.8, height = 12)
+# pdf("ManuscripPlots/Figure.S7a.crossRep.Damr.pdf", width = 16.8, height = 12)
 plot_grid(amr.AG.1_vs_amr.AG.2, amr.AG.1_vs_amr.AG.3, amr.AG.2_vs_amr.AG.3, amr.EB.1_vs_amr.EB.2, amr.TS.1_vs_amr.TS.2, amr.TS.1_vs_amr.TS.3, amr.TS.2_vs_amr.TS.3, ncol = 2, nrow = 4)
-dev.off()
+# dev.off()
 
 lum.AG.1_vs_lum.AG.2 = MA_BPlot(grpCountData_normByDESeq, "lum_AG_1", "lum_AG_2")
 lum.AG.1_vs_lum.AG.3 = MA_BPlot(grpCountData_normByDESeq, "lum_AG_1", "lum_AG_3")
@@ -199,9 +199,9 @@ lum.EB.1_vs_lum.EB.2 = MA_BPlot(grpCountData_normByDESeq, "lum_EB_1", "lum_EB_2"
 lum.TS.1_vs_lum.TS.2 = MA_BPlot(grpCountData_normByDESeq, "lum_TS_1", "lum_TS_2")
 lum.TS.1_vs_lum.TS.3 = MA_BPlot(grpCountData_normByDESeq, "lum_TS_1", "lum_TS_3")
 lum.TS.2_vs_lum.TS.3 = MA_BPlot(grpCountData_normByDESeq, "lum_TS_2", "lum_TS_3")
-pdf("ManuscripPlots/Figure.S7b.crossRep.Dlum.pdf", width = 16.8, height = 12)
+# pdf("ManuscripPlots/Figure.S7b.crossRep.Dlum.pdf", width = 16.8, height = 12)
 plot_grid(lum.AG.1_vs_lum.AG.2, lum.AG.1_vs_lum.AG.3, lum.AG.2_vs_lum.AG.3, lum.EB.1_vs_lum.EB.2, lum.TS.1_vs_lum.TS.2, lum.TS.1_vs_lum.TS.3, lum.TS.2_vs_lum.TS.3, ncol = 2, nrow = 4)
-dev.off()
+# dev.off()
 
 nov.AG.1_vs_nov.AG.2 = MA_BPlot(grpCountData_normByDESeq, "nov_AG_1", "nov_AG_2")
 nov.AG.1_vs_nov.AG.3 = MA_BPlot(grpCountData_normByDESeq, "nov_AG_1", "nov_AG_3")
@@ -210,9 +210,9 @@ nov.EB.1_vs_nov.EB.2 = MA_BPlot(grpCountData_normByDESeq, "nov_EB_1", "nov_EB_2"
 nov.TS.1_vs_nov.TS.2 = MA_BPlot(grpCountData_normByDESeq, "nov_TS_1", "nov_TS_2")
 nov.TS.1_vs_nov.TS.3 = MA_BPlot(grpCountData_normByDESeq, "nov_TS_1", "nov_TS_3")
 nov.TS.2_vs_nov.TS.3 = MA_BPlot(grpCountData_normByDESeq, "nov_TS_2", "nov_TS_3")
-pdf("ManuscripPlots/Figure.S7c.crossRep.Dnov.pdf", width = 16.8, height = 12)
+# pdf("ManuscripPlots/Figure.S7c.crossRep.Dnov.pdf", width = 16.8, height = 12)
 plot_grid(nov.AG.1_vs_nov.AG.2, nov.AG.1_vs_nov.AG.3, nov.AG.2_vs_nov.AG.3, nov.EB.1_vs_nov.EB.2, nov.TS.1_vs_nov.TS.2, nov.TS.1_vs_nov.TS.3, nov.TS.2_vs_nov.TS.3, ncol = 2, nrow = 4)
-dev.off()
+# dev.off()
 
 vir.AG.1_vs_vir.AG.2 = MA_BPlot(grpCountData_normByDESeq, "vir_AG_1", "vir_AG_2")
 vir.AG.1_vs_vir.AG.3 = MA_BPlot(grpCountData_normByDESeq, "vir_AG_1", "vir_AG_3")
@@ -221,9 +221,9 @@ vir.EB.1_vs_vir.EB.2 = MA_BPlot(grpCountData_normByDESeq, "vir_EB_1", "vir_EB_2"
 vir.TS.1_vs_vir.TS.2 = MA_BPlot(grpCountData_normByDESeq, "vir_TS_1", "vir_TS_2")
 vir.TS.1_vs_vir.TS.3 = MA_BPlot(grpCountData_normByDESeq, "vir_TS_1", "vir_TS_3")
 vir.TS.2_vs_vir.TS.3 = MA_BPlot(grpCountData_normByDESeq, "vir_TS_2", "vir_TS_3")
-pdf("ManuscripPlots/Figure.S7d.crossRep.Dvir.pdf", width = 16.8, height = 12)
+# pdf("ManuscripPlots/Figure.S7d.crossRep.Dvir.pdf", width = 16.8, height = 12)
 plot_grid(vir.AG.1_vs_vir.AG.2, vir.AG.1_vs_vir.AG.3, vir.AG.2_vs_vir.AG.3, vir.EB.1_vs_vir.EB.2, vir.TS.1_vs_vir.TS.2, vir.TS.1_vs_vir.TS.3, vir.TS.2_vs_vir.TS.3, ncol = 2, nrow = 4)
-dev.off()
+# dev.off()
 
 
 ## Filter count data by minimum count across ANY sample (200 in this case)
@@ -738,9 +738,9 @@ EB_candidates_Vdiag=venn.diagram(EB_candidates, NULL, fill=c("#670066", "#86bd38
 TS_candidates_Vdiag=venn.diagram(TS_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 0.8, cat.fontface= 4, cat.cex = 1, resolution = 1000, main = "testes", main.cex = 1.6)
 
 # PLOT for 
-pdf("ManuscripPlots/Figure.S8.VennDiagram.pdf", width = 6.9, height = 4.9)
+# pdf("ManuscripPlots/Figure.S8.VennDiagram.pdf", width = 6.9, height = 4.9)
 grid.arrange(gTree(children=AG_candidates_Vdiag), gTree(children =SFP_candidates_Vdiag), gTree(children=EB_candidates_Vdiag), gTree(children=TS_candidates_Vdiag), ncol=2)
-dev.off()
+# dev.off()
 
 
 ############################################################################
@@ -824,11 +824,14 @@ nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table$tissue = "Accessory glands"
 colnames(nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)[7:8] = c("S.right", "S.left")
 
 allAG.tmp = rbind(amr.v.lum.lrt.crossSpecies.AG.Contrasts.tTags.table, amr.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table, amr.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, lum.v.nov.lrt.crossSpecies.AG.Contrasts.tTags.table, lum.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table, nov.v.vir.lrt.crossSpecies.AG.Contrasts.tTags.table)
-allAG.tmp = subset(allAG.tmp, FBgn_ID %in% unlist(AG_candidates))
-allAG.tmp = subset(allAG.tmp, FBgn_ID %!in% unlist(SFP_candidates))
 # extract SFP genes from above tmp file
 allSFP.tmp = subset(allAG.tmp, FBgn_ID %in% unlist(SFP_candidates))
 allSFP.tmp$tissue = "SFPs"
+
+allAG.tmp = subset(allAG.tmp, FBgn_ID %!in% unlist(SFP_candidates))
+allAG.tmp = subset(allAG.tmp, FBgn_ID %in% unlist(AG_candidates))
+
+
 
 ## EJaculatory Bulb
 crossSpecies.EB.Contrasts=makeContrasts(amr.v.lum=amr_EB-lum_EB, amr.v.nov=amr_EB-nov_EB, amr.v.vir=amr_EB-vir_EB, lum.v.nov=lum_EB-nov_EB, lum.v.vir=lum_EB-vir_EB, nov.v.vir=nov_EB-vir_EB, levels = grp.design)
@@ -999,7 +1002,7 @@ crossSpecies.ALL.df = rbind(allAG.tmp, allEB.tmp, allTS.tmp)
 crossSpecies.ALL.df$Sig = ifelse(crossSpecies.ALL.df$FDR < 0.01, "YES", "NO")
 crossSpecies.ALL.df = merge(crossSpecies.ALL.df, gffRecord)
 
-pdf("ManuscripPlots/Figure.S9.tiss-biased.volcanoPlots.pdf", width = 12, height = 6)
+# pdf("ManuscripPlots/Figure.S9.tiss-biased.volcanoPlots.pdf", width = 12, height = 6)
 ggplot() + 
   geom_point(data = subset(crossSpecies.ALL.df, logFC > 0), aes (logFC, -log10(PValue), colour = Sig, size = S.right), alpha = 0.6) + 
   geom_point(data = subset(crossSpecies.ALL.df, logFC < 0), aes (logFC, -log10(PValue), colour = Sig, size = S.left), alpha = 0.6) + 
@@ -1010,13 +1013,13 @@ ggplot() +
   scale_size(range = c(-2, 2)) + 
   ylab("-log10(p-value)") +
   theme(axis.title.x = element_text(face = "bold", size = 12, vjust=0.1), axis.text.x=element_text(face = "bold", size = 8),axis.text.y = element_text(face = "bold", size = 12), axis.title.y = element_text(face = "bold.italic", size = 12, vjust=0.1), strip.text=element_text(face="bold.italic", size = 11))
-dev.off()
+# dev.off()
 
 # SFP candidates
 allSFP.tmp$Sig = ifelse(allSFP.tmp$FDR < 0.01, "YES", "NO")
 allSFPs = merge(allSFP.tmp, gffRecord)
 
-pdf("ManuscripPlots/Figure.NA.SFPs.volcanoPlots.pdf", width = 12.5, height = 2.73)
+# pdf("ManuscripPlots/Figure.NA.SFPs.volcanoPlots.pdf", width = 12.5, height = 2.73)
 ggplot() + 
   geom_point(data = subset(allSFPs, logFC > 0), aes (logFC, -log10(PValue), colour = Sig, size = S.right), alpha = 0.7) + 
   geom_point(data = subset(allSFPs, logFC < 0), aes (logFC, -log10(PValue), colour = Sig, size = S.left), alpha = 0.7) + 
@@ -1027,11 +1030,7 @@ ggplot() +
   scale_size(range = c(-3, 5)) + 
   ylab("-log10(p-value)") +
   theme(axis.title.x = element_text(face = "bold", size = 12, vjust=0.1), axis.text.x=element_text(face = "bold", size = 10), axis.text.y = element_text(face = "bold", size = 10), axis.title.y = element_text(face = "bold.italic", size = 12, vjust=0.1), strip.text=element_text(face="bold.italic", size = 12)) 
-dev.off()
-
-#### 3d Plot (not very useful)
-#plot_ly(subset(amr.lrt.crossSpecies.TS.Contrasts.tTags.table, rownames(amr.lrt.crossSpecies.TS.Contrasts.tTags.table) %in% amr.crossSpecies.TS.list), x=~logFC.amr.v.lum, y=~logFC.amr.v.nov, z=~logFC.amr.v.vir, color = ~-log10(FDR), type = "scatter3d", colors = )
-
+# dev.off()
 
 
 ##### FIND De Novo Transcripts ############################################################
@@ -1039,8 +1038,9 @@ dev.off()
 ##### Here's a method to find Trinity transcript that are not found in dvir1.06 annotation,
 ##### then checking whether orthologues exist in the other Trinity assemblies
 
-# D. americana SFPs
 selectionCols = c("dvir1.06_BlastX_topHit", "dvir1.06_BlastP_topHit", "gene_id", "prot_id")
+
+# D. americana SFPs
 amr.SFP.dvir1.06.orths = subset(amrTrinotate, gene_id %in% amr.SFP.list)[selectionCols]
 amr.SFP.dvir1.06.orths = droplevels(amr.SFP.dvir1.06.orths)
 amr.SFP.dvir1.06.orths = amr.SFP.dvir1.06.orths[order(amr.SFP.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
@@ -1050,10 +1050,7 @@ amr.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = amr.SF
 amr.SFP_no_dvir1.06_hits = subset(amr.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
 amr.SFP_no_dvir1.06_hits = unique(strsplit(amr.SFP_no_dvir1.06_hits, ", ")[[1]])
 amr.SFP_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% amr.SFP_no_dvir1.06_hits)$Gene))
-setdiff(amr.SFP_no_dvir1.06_hits, amr.SFP_no_dvir1.06_hits_Trin_hits)
-# pdf("Plots/genePlots_amr.SFP_no_dvir1.06_hits.pdf", height = 3)
-# lapply(amr.SFP_no_dvir1.06_hits, plotGeneT, object=TPMseBRR_amrTrin)
-# dev.off()
+deNovo.amr.SFPs = setdiff(amr.SFP_no_dvir1.06_hits, amr.SFP_no_dvir1.06_hits_Trin_hits)
 
 # D. lummei SFPs
 lum.SFP.dvir1.06.orths = subset(lumTrinotate, gene_id %in% lum.SFP.list)[selectionCols]
@@ -1065,19 +1062,19 @@ lum.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = lum.SF
 lum.SFP_no_dvir1.06_hits = subset(lum.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
 lum.SFP_no_dvir1.06_hits = unique(strsplit(lum.SFP_no_dvir1.06_hits, ", ")[[1]])
 lum.SFP_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% lum.SFP_no_dvir1.06_hits)$Gene))
-setdiff(lum.SFP_no_dvir1.06_hits, lum.SFP_no_dvir1.06_hits_Trin_hits)
+deNovo.lum.SFPs = setdiff(lum.SFP_no_dvir1.06_hits, lum.SFP_no_dvir1.06_hits_Trin_hits)
 
 # D. novamexicana SFPs
 nov.SFP.dvir1.06.orths = subset(novTrinotate, gene_id %in% nov.SFP.list)[selectionCols]
 nov.SFP.dvir1.06.orths = droplevels(nov.SFP.dvir1.06.orths)
 nov.SFP.dvir1.06.orths = nov.SFP.dvir1.06.orths[order(nov.SFP.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
 nov.SFP.dvir1.06.orths[is.na(nov.SFP.dvir1.06.orths)] = "NoHit"
-nov.SFP.dvir1.06.orths = subset(novSFP.dvir1.06.orths, prot_id != "NoHit")
+nov.SFP.dvir1.06.orths = subset(nov.SFP.dvir1.06.orths, prot_id != "NoHit")
 nov.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = nov.SFP.dvir1.06.orths, toString)
 nov.SFP_no_dvir1.06_hits = subset(nov.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
 nov.SFP_no_dvir1.06_hits = unique(strsplit(nov.SFP_no_dvir1.06_hits, ", ")[[1]])
 nov.SFP_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% nov.SFP_no_dvir1.06_hits)$Gene))
-setdiff(nov.SFP_no_dvir1.06_hits, nov.SFP_no_dvir1.06_hits_Trin_hits)
+deNovo.nov.SFPs = setdiff(nov.SFP_no_dvir1.06_hits, nov.SFP_no_dvir1.06_hits_Trin_hits)
 
 # D. virilis SFPs
 vir.SFP.dvir1.06.orths = subset(virTrinotate, gene_id %in% vir.SFP.list)[selectionCols]
