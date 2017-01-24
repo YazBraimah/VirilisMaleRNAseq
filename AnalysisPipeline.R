@@ -1786,7 +1786,7 @@ SFP.geneinfo = sapply(SFP_elements$`D.ame,D.lum,D.nov,D.vir`, geneLookupG, compl
 EB.geneinfo = sapply(EB_elements$`D.ame,D.lum,D.nov,D.vir`, geneLookupG, complete =T)
 TS.geneinfo = sapply(TS_elements$`D.ame,D.lum,D.nov,D.vir`, geneLookupG, complete =T)
 
-## Output individual gene info files
+## Output individual gene info files (the output for each category needs to be concatenated and transposed with the "transposer.sh" script)
 for (i in names(AG.geneinfo)){
   write.table(AG.geneinfo[[i]], paste("GeneInfo/AG-biased/AG.", i, ".txt", sep=""), quote = F, col.names = F, sep = "\t")
 }
@@ -1799,3 +1799,10 @@ for (i in names(EB.geneinfo)){
 for (i in names(TS.geneinfo)){
   write.table(TS.geneinfo[[i]], paste("GeneInfo/TS-biased/TS.", i, ".txt", sep=""), quote = F, col.names = F, sep = "\t")
 }
+
+### Interspecific hatch rate data
+hatchData = read.csv("Misc/Hatch_rate_data.csv", header = T, sep = ",")
+
+pdf("Plots/HatchRate.pdf", width = 7.75, height = 2.8)
+ggplot(hatchData, aes(Female, Hatch_rate, fill = Cross_Type)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Hatch_rate-se, ymax=Hatch_rate+se), width=.2, position=position_dodge(.9)) + facet_grid(~Male) + theme_bw() + theme(axis.text.x = element_text(angle=45, vjust = 0.5, face = "bold.italic"), strip.text = element_text(face = "bold.italic"), legend.title = element_text(face = "bold")) + ylab("Hatch rate (%)") + scale_fill_manual(values=c("#00ab42", "#71001c"))
+dev.off()
