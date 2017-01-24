@@ -18,6 +18,7 @@ virTrinotate = read.csv("Annotations/Trinotate_report_virTrin3_subset.txt", head
 
 gffRecord = read.table("Annotations/FBgn_ID_name_coordinates.txt", header = T)
 TrinOrths = read.table("Annotations/Trin3.orthology.txt", header = T, sep = "\t")
+VettOrths = read.table("Annotations/Vetted.orthologs_dvir2.1.txt", header = T, sep = "\t")
 
 ## Load mel ortholog info
 melOrths = read.table(file = "Other.Drosophilas/Dmel/mel_orths.txt", header = T)
@@ -729,7 +730,7 @@ EB_elements = lapply(EB_combs, function(i) Setdiff(EB_candidates[i], EB_candidat
 TS_elements = lapply(TS_combs, function(i) Setdiff(TS_candidates[i], TS_candidates[setdiff(names(TS_candidates), i)]))
 
 # example to show the partitioning of genes within each tissue element
-sapply(AG_elements, length)
+sapply(SFP_elements, length)
 
 ### Draw a VennDiagram of each element
 AG_candidates_Vdiag=venn.diagram(AG_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 0.8, cat.fontface= 4, cat.cex = 1, resolution = 1000, main = "acc. glands", main.cex = 1.6)
@@ -1033,7 +1034,7 @@ ggplot() +
 # dev.off()
 
 
-##### FIND De Novo Transcripts ############################################################
+##### FIND De Novo SFPs ############################################################
 ###########################################################################################                                       
 ##### Here's a method to find Trinity transcript that are not found in dvir1.06 annotation,
 ##### then checking whether orthologues exist in the other Trinity assemblies
@@ -1086,57 +1087,7 @@ vir.SFP.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = vir.SF
 vir.SFP_no_dvir1.06_hits = subset(vir.SFP.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
 vir.SFP_no_dvir1.06_hits = unique(strsplit(vir.SFP_no_dvir1.06_hits, ", ")[[1]])
 vir.SFP_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% vir.SFP_no_dvir1.06_hits)$Gene))
-setdiff(vir.SFP_no_dvir1.06_hits, vir.SFP_no_dvir1.06_hits_Trin_hits)
-
-########################################################################
-
-# D. americana AGs
-amr.AG.dvir1.06.orths = subset(amrTrinotate, gene_id %in% amr.AG.list)[selectionCols]
-amr.AG.dvir1.06.orths = droplevels(amr.AG.dvir1.06.orths)
-amr.AG.dvir1.06.orths = amr.AG.dvir1.06.orths[order(amr.AG.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
-amr.AG.dvir1.06.orths[is.na(amr.AG.dvir1.06.orths)] = "NoHit"
-amr.AG.dvir1.06.orths = subset(amr.AG.dvir1.06.orths, prot_id != "NoHit")
-amr.AG.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = amr.AG.dvir1.06.orths, toString)
-amr.AG_no_dvir1.06_hits = subset(amr.AG.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
-amr.AG_no_dvir1.06_hits = unique(strsplit(amr.AG_no_dvir1.06_hits, ", ")[[1]])
-amr.AG_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% amr.AG_no_dvir1.06_hits)$Gene))
-tmpAGamrList = setdiff(amr.AG_no_dvir1.06_hits, amr.AG_no_dvir1.06_hits_Trin_hits)
-
-
-# D. lummei AGs
-lum.AG.dvir1.06.orths = subset(lumTrinotate, gene_id %in% lum.AG.list)[selectionCols]
-lum.AG.dvir1.06.orths = droplevels(lum.AG.dvir1.06.orths)
-lum.AG.dvir1.06.orths = lum.AG.dvir1.06.orths[order(lum.AG.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
-lum.AG.dvir1.06.orths[is.na(lum.AG.dvir1.06.orths)] = "NoHit"
-lum.AG.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = lum.AG.dvir1.06.orths, toString)
-lum.AG_no_dvir1.06_hits = subset(lum.AG.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
-lum.AG_no_dvir1.06_hits = unique(strsplit(lum.AG_no_dvir1.06_hits, ", ")[[1]])
-lum.AG_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% lum.AG_no_dvir1.06_hits)$Gene))
-setdiff(lum.AG_no_dvir1.06_hits, lum.AG_no_dvir1.06_hits_Trin_hits)
-
-# D. novamexicana AGs
-nov.AG.dvir1.06.orths = subset(novTrinotate, gene_id %in% nov.AG.list)[selectionCols]
-nov.AG.dvir1.06.orths = droplevels(nov.AG.dvir1.06.orths)
-nov.AG.dvir1.06.orths = nov.AG.dvir1.06.orths[order(nov.AG.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
-nov.AG.dvir1.06.orths[is.na(nov.AG.dvir1.06.orths)] = "NoHit"
-nov.AG.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = nov.AG.dvir1.06.orths, toString)
-nov.AG_no_dvir1.06_hits = subset(nov.AG.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
-nov.AG_no_dvir1.06_hits = unique(strsplit(nov.AG_no_dvir1.06_hits, ", ")[[1]])
-nov.AG_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% nov.AG_no_dvir1.06_hits)$Gene))
-setdiff(nov.AG_no_dvir1.06_hits, nov.AG_no_dvir1.06_hits_Trin_hits)
-
-# D. virilis AGs
-vir.AG.dvir1.06.orths = subset(virTrinotate, gene_id %in% vir.AG.list)[selectionCols]
-vir.AG.dvir1.06.orths = droplevels(vir.AG.dvir1.06.orths)
-vir.AG.dvir1.06.orths = vir.AG.dvir1.06.orths[order(vir.AG.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
-vir.AG.dvir1.06.orths[is.na(vir.AG.dvir1.06.orths)] = "NoHit"
-vir.AG.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = vir.AG.dvir1.06.orths, toString)
-vir.AG_no_dvir1.06_hits = subset(vir.AG.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
-vir.AG_no_dvir1.06_hits = unique(strsplit(vir.AG_no_dvir1.06_hits, ", ")[[1]])
-vir.AG_no_dvir1.06_hits_Trin_hits = as.character(unique(subset(TrinOrths, Gene %in% vir.AG_no_dvir1.06_hits)$Gene))
-setdiff(vir.AG_no_dvir1.06_hits, vir.AG_no_dvir1.06_hits_Trin_hits)
-
-
+deNovo.vir.SFPs = setdiff(vir.SFP_no_dvir1.06_hits, vir.SFP_no_dvir1.06_hits_Trin_hits)
 
 
 ########################################################################
@@ -1305,7 +1256,7 @@ label.001 = subset(dataChiSq, pval<0.001)
 
 tissue_biased.numbers.c$tissue = factor(tissue_biased.numbers.c$tissue, levels = c("SFPs", "Accessory glands", "Ejaculatory Bulb", "Testes"))
 
-pdf(file = "ManuscripPlots/Figure.NA.chromDist.pdf", width = 8.10, height = 2.4)
+# pdf(file = "ManuscripPlots/Figure.NA.chromDist.pdf", width = 8.10, height = 2.4)
 ggplot(tissue_biased.numbers.c, aes(x=chromosome, y=obs.exp, fill=chromosome)) +
   geom_bar(position=position_dodge(), stat="identity") +
   scale_fill_manual(values=c("#CC79A7", "#56B4E9", "#56B4E9", "#56B4E9", "#56B4E9")) +
@@ -1318,7 +1269,7 @@ ggplot(tissue_biased.numbers.c, aes(x=chromosome, y=obs.exp, fill=chromosome)) +
   geom_text(data = label.05, label = "*", size = 6, colour = "red", fontface=2) +
   geom_text(data = label.01, label = "**", size = 6, colour = "red", fontface=2) +
   geom_text(data = label.001, label = "***", size = 6, colour = "red", fontface=2)
-dev.off()
+# dev.off()
 
 
 ##########################################################################################
@@ -1384,7 +1335,7 @@ meanOmega.df=data.frame(Class = c("All", "EB", "testes", "AG", "SFPs"), omega=c(
 
 meanOmega.df$Class = factor (meanOmega.df$Class, levels = c("All", "EB", "testes", "AG", "SFPs"))
 
-pdf("ManuscripPlots/Figure.NA.meanOmega.pdf", width = 4.25, height = 2.25)
+# pdf("ManuscripPlots/Figure.NA.meanOmega.pdf", width = 4.25, height = 2.25)
 ggplot(meanOmega.df, aes(Class, omega, colour=Class)) + 
   geom_point(size = 2) + 
   geom_errorbar(aes(ymin=omega-se, ymax=omega+se), width=.2, position=position_dodge(.9)) + 
@@ -1393,7 +1344,7 @@ ggplot(meanOmega.df, aes(Class, omega, colour=Class)) +
   theme(legend.position="none") +
   ylab(expression(omega)) + 
   xlab("Gene class")
-dev.off()
+# dev.off()
 
 paml.data$chromosome = factor (paml.data$chromosome, levels = c("Chr_X", "Chr_2", "Chr_3", "Chr_4", "Chr_5"))
 
@@ -1444,9 +1395,9 @@ C5.qtl = data.frame(xmin=c(13800000, 16300000, 22800000), xmax=c(14750000, 21700
   scale_fill_manual(name = '', values = "red",labels = "PMPZ\nQTL region") +
   theme_bw())
 
-pdf("ManuscripPlots/Figure.NA.omegaAcrossChrs.pdf", width = 8.5, height = 5.6)
+# pdf("ManuscripPlots/Figure.NA.omegaAcrossChrs.pdf", width = 8.5, height = 5.6)
 plot_grid(gg.SFP_and_EB, gg.AG, gg.TS, ncol = 1)
-dev.off()
+# dev.off()
 
 ###################
 ##################
@@ -1466,7 +1417,7 @@ subset.paml = subset(subset.paml, select=c("FBgn_ID","gene_name","chromosome","m
 subset.paml.m = melt(subset.paml, id.vars = c("FBgn_ID","gene_name","chromosome","min","tissue"))  
 
 
-pdf("ManuscripPlots/Figure.NA.PAMLfdr.chrom.pdf", width = 9, height = 5)
+# pdf("ManuscripPlots/Figure.NA.PAMLfdr.chrom.pdf", width = 9, height = 5)
 ggplot(subset(subset.paml.m, grepl("Chr", subset.paml.m$chromosome)), aes(min, -log10(value), colour = variable)) + 
   geom_point(size =2, alpha=0.5) +
   facet_grid(tissue~chromosome, scales = "free")+
@@ -1479,7 +1430,7 @@ ggplot(subset(subset.paml.m, grepl("Chr", subset.paml.m$chromosome)), aes(min, -
   ylab("-log10(FDR)") +
   scale_colour_manual(values=c("#b38c3a", "#8f73c9", "#5ea46d", "#ca587a")) + 
   theme_bw()
-dev.off()
+# dev.off()
 
 
 ### PAML PValues across chromosomes
@@ -1499,12 +1450,12 @@ ggplot(subset(subset.paml.m, grepl("Chr", subset.paml.m$chromosome)), aes(min, -
   geom_point(size =2, alpha=0.5) +
   facet_grid(tissue~chromosome, scales = "free")+
   geom_hline(yintercept = 1.3, linetype="dashed", colour = "purple") +
-  geom_text_repel(data=subset(subset.paml.m, tissue == "AG-biased" & value < 0.0001 & grepl("Chr", subset.paml.m$chromosome)),
+  geom_text_repel(data=subset(subset.paml.m, value < 0.05 & grepl("Chr", subset.paml.m$chromosome) & tissue != "TS-biased"),
                   aes(label = gene_name, colour = variable), size =3, force = 30) +
   scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), 
                      labels=expression("5", "10", "15", "20", "25", "30")) + 
   xlab ("Chromosome coordinates (Mb)") +
-  ylab("-log10(FDR)") +
+  ylab("-log10(p-value)") +
   scale_colour_manual(values=c("#b38c3a", "#8f73c9", "#5ea46d", "#ca587a")) + 
   theme_bw()
 
@@ -1515,7 +1466,7 @@ ggplot(subset(subset.paml.m, grepl("Chr", subset.paml.m$chromosome)), aes(min, -
 ### pairwise Ka/Ks across chromosomes
 KaKs.data$chromosome = factor (KaKs.data$chromosome, levels = c("Chr_X", "Chr_2", "Chr_3", "Chr_4", "Chr_5"))
 
-pdf("ManuscripPlots/Figure.NA.pwKaKs.SFPs.pdf", width = 9, height = 7)
+# pdf("ManuscripPlots/Figure.NA.pwKaKs.SFPs.pdf", width = 9, height = 7)
 ggplot(subset(KaKs.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` & `Ka/Ks` < 80), aes(max, `Ka/Ks`, colour = I("#647700"))) + 
   geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") + 
   geom_point(aes(size = `Ka/Ks`), alpha=0.75) + 
@@ -1529,11 +1480,10 @@ ggplot(subset(KaKs.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` & `
   geom_rect(data=C5.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="red", alpha=0.1, inherit.aes = FALSE) + 
   scale_fill_manual(name = '', values = "red",labels = "PMPZ\nQTL region") +
   theme_bw()
-dev.off()
+# dev.off()
 
 ###############################################################################
 ###############################################################################
-
 
 ###### Set up mel.Encode TPM summary
 mel.FBgn_ID_to_GeneSymbol= read.csv("Other.Drosophilas/Dmel/mel.FBgn_ID-to-GeneSymbol.txt", header = T, sep = "\t")
@@ -1620,7 +1570,7 @@ GO_enrichment_data = rbindlist(GO_enriched_list)
 
 ## plot it
 
-pdf("ManuscripPlots/Figure.NA.SFP_GO.pdf", width = 7.92, height = 5.92)
+# pdf("ManuscripPlots/Figure.NA.SFP_GO.pdf", width = 7.92, height = 5.92)
 ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "SFP-biased"), 
        aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + 
   geom_point()  + 
@@ -1637,9 +1587,9 @@ ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "SFP-b
   scale_size(range = c(5,12)) + 
   scale_colour_manual(values=c("#c27d92", "#a8a34b", "#8e61bf")) + 
   scale_y_continuous(limits=c(3, 10))
-dev.off()
+# dev.off()
 
-pdf("ManuscripPlots/Figure_AG_GO.pdf", width = 5.8, height = 4.6)
+# pdf("ManuscripPlots/Figure_AG_GO.pdf", width = 5.8, height = 4.6)
 (gg_AG_GO = ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "AG-biased"), 
        aes(category, -log10(over_represented_pvalue), 
            size = numDEInCat, colour = ontology)) + 
@@ -1649,9 +1599,9 @@ pdf("ManuscripPlots/Figure_AG_GO.pdf", width = 5.8, height = 4.6)
   scale_colour_manual(values=c("#c27d92", "#a8a34b", "#8e61bf")) +
   ggtitle("AG-biased genes") + 
   theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 0.5)))
-dev.off()
+# dev.off()
 
-pdf("ManuscripPlots/Figure_EB_GO.pdf", width = 9.7, height = 4.6)
+# pdf("ManuscripPlots/Figure_EB_GO.pdf", width = 9.7, height = 4.6)
 (gg_EB_GO = ggplot(subset(GO_enrichment_data, over_represented_FDR < 0.05 & factor == "EB-biased"), 
        aes(category, -log10(over_represented_pvalue), size = numDEInCat, colour = ontology)) + 
   geom_point()  + 
@@ -1661,7 +1611,7 @@ pdf("ManuscripPlots/Figure_EB_GO.pdf", width = 9.7, height = 4.6)
   scale_colour_manual(values=c("#c27d92", "#a8a34b", "#8e61bf")) +
   ggtitle("EB-biased genes") + 
   theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 1, hjust = 1, size =7.5)))
-dev.off()
+# dev.off()
 
 # pdf("ManuscripPlots/Figure_AG_and_EB_GO.pdf", width = 15.5, height = 4.6)
 topRow = plot_grid(gg_AG_GO, gg_EB_GO, labels = c('A', 'B'), align = 'h', rel_widths = c(1, 1.73))
@@ -1678,10 +1628,152 @@ topRow = plot_grid(gg_AG_GO, gg_EB_GO, labels = c('A', 'B'), align = 'h', rel_wi
   ggtitle("Testes-biased genes") + 
   theme(axis.text.x = element_text(angle = 45, face = "bold", vjust = 1, hjust = 1, size =7.5)))
 
-pdf("ManuscripPlots/Figure_ALL_biased_GO.pdf", width = 15.5, height = 9.4)
+# pdf("ManuscripPlots/Figure_ALL_biased_GO.pdf", width = 15.5, height = 9.4)
 plot_grid(topRow, gg_TS_GO, labels = c('', 'C'), ncol = 1)
-dev.off()
+# dev.off()
 
+## Heatmap plot for all tissue biased genes. (Figure 1)
+Sig.Tissue.Biased = subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% rownames(gene_factor_table))
+rownames(Sig.Tissue.Biased) = Sig.Tissue.Biased$FBgn_ID
+Sig.Tissue.Biased[,1] = NULL
+
+data = Sig.Tissue.Biased
+gene_factor_table = read.table("GO.analysis/tissue-biased-gene-factors.txt", header=F, row.names=2)
+gene_factors = unique(gene_factor_table[,1])
+gene_factor_colors = rainbow(length(gene_factors))
+names(gene_factor_colors) = gene_factors
+data = log2(data+1)
+data = as.matrix(data) # convert to matrix
+sample_cor = cor(data, method='pearson', use='pairwise.complete.obs')
+sample_dist = as.dist(1-sample_cor)
+hc_samples = hclust(sample_dist, method='complete')
+gene_cor = NULL
+if (is.null(gene_cor)) { gene_cor = cor(t(data), method='pearson', use='pairwise.complete.obs') }
+gene_dist = as.dist(1-gene_cor)
+hc_genes = hclust(gene_dist, method='complete')
+myheatcol = colorpanel(75, '#00478b','black','#ffe945')
+data = t(scale(t(data), scale=F)) # center rows, mean substracted
+heatmap_data = data
+gene_factor_row_vals = as.factor(gene_factor_table[rownames(heatmap_data),])
+names(gene_factor_row_vals) = rownames(heatmap_data)
+gene_factors_here = unique(gene_factor_row_vals)
+names(gene_factors_here) = gene_factors_here
+num_gene_factors_here = length(gene_factors_here)
+geneFactorColors = c("#b04fb0", "#b85516", "#647700", "#f0cc35")
+geneFactorAnnotations = matrix(nrow=nrow(heatmap_data), ncol=num_gene_factors_here)
+for (i in 1:num_gene_factors_here) {
+  geneFactorAnnotations[,i] = gene_factor_row_vals %in% gene_factors_here[i]
+}
+geneFactorAnnotations = apply(geneFactorAnnotations, 1:2, function(x) as.logical(x))
+geneFactorAnnotations = t(sample_matrix_to_color_assignments(t(geneFactorAnnotations), col=geneFactorColors))
+rownames(geneFactorAnnotations) = rownames(heatmap_data)
+colnames(geneFactorAnnotations) = gene_factors_here
+heatmap_data[heatmap_data < -4] = -4
+heatmap_data[heatmap_data > 4] = 4
+
+## plot it
+#pdf("ManuscripPlots/Figure.1.SigGenes.Heatmap.pdf", width = 8, height = 7)
+heatmap.3(heatmap_data, dendrogram='both', Rowv=as.dendrogram(hc_genes), Colv=as.dendrogram(hc_samples), col=myheatcol, scale="none", density.info="none", trace="none", key=TRUE, keysize=1.5, cexCol=3, margins=c(10,10), cex.main=0.75, RowSideColors = geneFactorAnnotations)
+#dev.off()
+
+
+###########################################################################################
+###########################################################################################
+
+## Plot for genes orthologous to D. melanogaster SFPs
+virOrths_melSFPs_unique=as.character(unique(subset(melOrths, mel_FBgn_ID %in% melSFPs$mel_FBgn_ID)$FBgn_ID))
+virOrths_melSFPs_unique.matrix = subset(grpMeanTPMmatrix.BRR, FBgn_ID %in% virOrths_melSFPs_unique)
+rownames(virOrths_melSFPs_unique.matrix) = virOrths_melSFPs_unique.matrix$FBgn_ID
+virOrths_melSFPs_unique.matrix[,1] = NULL
+
+data = virOrths_melSFPs_unique.matrix
+gene_factor_table = read.table("GO.analysis/tissue-biased-gene-factors.txt", header=F, row.names=2)
+gene_factors = unique(gene_factor_table[,1])
+gene_factor_colors = rainbow(length(gene_factors))
+names(gene_factor_colors) = gene_factors
+data = log2(data+1)
+data = as.matrix(data) # convert to matrix
+sample_cor = cor(data, method='pearson', use='pairwise.complete.obs')
+sample_dist = as.dist(1-sample_cor)
+hc_samples = hclust(sample_dist, method='complete')
+gene_cor = NULL
+if (is.null(gene_cor)) { gene_cor = cor(t(data), method='pearson', use='pairwise.complete.obs') }
+gene_dist = as.dist(1-gene_cor)
+hc_genes = hclust(gene_dist, method='complete')
+myheatcol = colorpanel(75, 'blue','black','yellow')
+data = t(scale(t(data), scale=F)) # center rows, mean substracted
+heatmap_data = data
+gene_factor_row_vals = as.factor(gene_factor_table[rownames(heatmap_data),])
+names(gene_factor_row_vals) = rownames(heatmap_data)
+gene_factors_here = unique(gene_factor_row_vals)
+names(gene_factors_here) = gene_factors_here
+num_gene_factors_here = length(gene_factors_here)
+geneFactorColors = c("gray", "#f0cc35", "#647700", "#b85516", "#b04fb0")
+geneFactorAnnotations = matrix(nrow=nrow(heatmap_data), ncol=num_gene_factors_here)
+for (i in 1:num_gene_factors_here) {
+  geneFactorAnnotations[,i] = gene_factor_row_vals %in% gene_factors_here[i]
+}
+geneFactorAnnotations = apply(geneFactorAnnotations, 1:2, function(x) as.logical(x))
+geneFactorAnnotations = t(sample_matrix_to_color_assignments(t(geneFactorAnnotations), col=geneFactorColors))
+rownames(geneFactorAnnotations) = rownames(heatmap_data)
+colnames(geneFactorAnnotations) = gene_factors_here
+heatmap_data[heatmap_data < -4] = -4
+heatmap_data[heatmap_data > 4] = 4
+## plot it
+# pdf("ManuscripPlots/Figure.NA.vir-SFPorths.pdf", width = 8, height = 9)
+heatmap.3(heatmap_data, dendrogram='both', Rowv=as.dendrogram(hc_genes), Colv=as.dendrogram(hc_samples), col=myheatcol, scale="none", density.info="none", trace="none", key=TRUE, keysize=1.5, cexCol=1, margins=c(10,10), cex.main=0.75, RowSideColors = geneFactorAnnotations)
+# dev.off()
+
+
+######################################################################################
+######################################################################################
+
+## To align with mel data, the gene order was extracted from the above plot
+Gene_order <- c("FBgn0198297", "FBgn0198070", "FBgn0211506", "FBgn0211265", "FBgn0211264", "FBgn0210455", "FBgn0208251", "FBgn0211572", "FBgn0201870", "FBgn0208483", "FBgn0207310", "FBgn0199826", "FBgn0208636", "FBgn0204528", "FBgn0210972", "FBgn0208258", "FBgn0208634", "FBgn0197757", "FBgn0211681", "FBgn0208635", "FBgn0210106", "FBgn0207309", "FBgn0198723", "FBgn0204606", "FBgn0201151", "FBgn0198354", "FBgn0206811", "FBgn0211178", "FBgn0210785", "FBgn0211353", "FBgn0209429", "FBgn0198486", "FBgn0209622", "FBgn0198727", "FBgn0203651", "FBgn0197681", "FBgn0203960", "FBgn0208385", "FBgn0201114", "FBgn0199796", "FBgn0204797", "FBgn0197781", "FBgn0204112", "FBgn0208460", "FBgn0203780", "FBgn0208863", "FBgn0202385", "FBgn0211239", "FBgn0014844", "FBgn0207525", "FBgn0200743", "FBgn0208533", "FBgn0209422", "FBgn0205391", "FBgn0208806", "FBgn0202095", "FBgn0208531", "FBgn0200130", "FBgn0207752", "FBgn0207077", "FBgn0206035", "FBgn0205490", "FBgn0201667", "FBgn0211705", "FBgn0209081", "FBgn0198061", "FBgn0210119", "FBgn0205696", "FBgn0203001", "FBgn0208144", "FBgn0197362", "FBgn0211267", "FBgn0209928", "FBgn0208484", "FBgn0204667", "FBgn0199055", "FBgn0211028", "FBgn0199487", "FBgn0205283", "FBgn0204128", "FBgn0211755", "FBgn0207151", "FBgn0207835", "FBgn0208133", "FBgn0200191", "FBgn0210936", "FBgn0201487")
+Gene_order = as.data.frame(Gene_order)
+Gene_order$number = seq(1,87)
+colnames(Gene_order) = c("FBgn_ID", "number")
+
+
+jointNames=subset(melOrths, mel_FBgn_ID %in% melSFPs$mel_FBgn_ID)
+melSFPs.with.virOrth.and.aggtd.vir.FBgn_ID = aggregate(mel_FBgn_ID~FBgn_ID, data = jointNames, toString)
+single_orth_table=as.data.frame(gsub(".*, ", "",melSFPs.with.virOrth.and.aggtd.vir.FBgn_ID$mel_FBgn_ID))
+jointNames = cbind(melSFPs.with.virOrth.and.aggtd.vir.FBgn_ID$FBgn_ID, single_orth_table)
+colnames(jointNames) = c("FBgn_ID", "mel_FBgn_ID")
+#jointNames$FBgn_ID=levels(droplevels(jointNames$FBgn_ID))
+melRPKM.reduced.matrix = subset(melRPKM, select =c("mel_FBgn_ID", "Adult_Male_mated_4days_AccGlnd", "Adult_Male_mated_4days_head", "Adult_Male_mated_4days_testis"))
+melSFPs.RPKM.matrix = subset(melRPKM.reduced.matrix, mel_FBgn_ID %in% jointNames$mel_FBgn_ID)
+
+tmp.melMatrix.SFPs = merge(jointNames, melSFPs.RPKM.matrix, all=TRUE)
+melMatrix.reduced.SFPs = subset(tmp.melMatrix.SFPs, Adult_Male_mated_4days_AccGlnd != "NA" & FBgn_ID != "NA")
+
+melData.to.plot.heatmap = merge(melMatrix.reduced.SFPs, Gene_order, all=TRUE)
+melData.to.plot.heatmap=melData.to.plot.heatmap[order(melData.to.plot.heatmap$number),]
+melData.to.plot.heatmap = subset (melData.to.plot.heatmap, mel_FBgn_ID != "NA" & Adult_Male_mated_4days_AccGlnd != "NA")
+melData.to.plot.heatmap = subset (melData.to.plot.heatmap, select = c("FBgn_ID", "Adult_Male_mated_4days_AccGlnd", "Adult_Male_mated_4days_head", "Adult_Male_mated_4days_testis"))
+colnames(melData.to.plot.heatmap) = c("FBgn_ID", "AG", "Head", "testis")
+rownames(melData.to.plot.heatmap) = melData.to.plot.heatmap$FBgn_ID
+melData.to.plot.heatmap[,1] = NULL
+
+## Plot for D. melanogaster SFPs with virilis orthologues
+data = melData.to.plot.heatmap
+data = log2(data+1)
+data = as.matrix(data) # convert to matrix
+sample_cor = cor(data, method='pearson', use='pairwise.complete.obs')
+sample_dist = as.dist(1-sample_cor)
+hc_samples = hclust(sample_dist, method='complete')
+gene_cor = NULL
+if (is.null(gene_cor)) { gene_cor = cor(t(data), method='pearson', use='pairwise.complete.obs') }
+gene_dist = as.dist(1-gene_cor)
+myheatcol = colorpanel(75, 'blue','black','yellow')
+data = t(scale(t(data), scale=F)) # center rows, mean substracted
+heatmap_data = data
+heatmap_data[heatmap_data < -4] = -4
+heatmap_data[heatmap_data > 4] = 4
+## plot it
+# pdf("ManuscripPlots/Figure.NA.mel-SFPs.with.vir-orths.pdf", width = 8, height = 9)
+heatmap.3(heatmap_data, dendrogram='col', Rowv=F, Colv=as.dendrogram(hc_samples), col=myheatcol, scale="none", density.info="none", trace="none", key=TRUE, keysize=1.2, cexCol=1, margins=c(10,10), cex.main=0.75, main=paste("samples vs. features", "ordered.mel.matrix.minCol10.minRow1.log2.centered" ) )
+# dev.off()
 
 
 ###############################
