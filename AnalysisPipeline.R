@@ -1806,3 +1806,11 @@ hatchData = read.csv("Misc/Hatch_rate_data.csv", header = T, sep = ",")
 pdf("Plots/HatchRate.pdf", width = 7.75, height = 2.8)
 ggplot(hatchData, aes(Female, Hatch_rate, fill = Cross_Type)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymin=Hatch_rate-se, ymax=Hatch_rate+se), width=.2, position=position_dodge(.9)) + facet_grid(~Male) + theme_bw() + theme(axis.text.x = element_text(angle=45, vjust = 0.5, face = "bold.italic"), strip.text = element_text(face = "bold.italic"), legend.title = element_text(face = "bold")) + ylab("Hatch rate (%)") + scale_fill_manual(values=c("#00ab42", "#71001c"))
 dev.off()
+
+
+### deNovo gene numbers
+deNovo.numbers = read.table(file = "Sequence.Files/DeNovo.analysis/species-specific.deNovo.genes.txt", header = T, sep = "\t")
+
+pdf(file = "Plots/number.of.deNovo.transcripts.pdf", width = 5, height = 1.65)
+ggplot(deNovo.numbers, aes(Species, DeNovo_transcripts, fill = Species)) + geom_bar(stat = "identity", position = "dodge") + facet_wrap(~Tissue, scales = "free_x") + theme_bw() + xlab(NULL) + ylab("Number of unique\ntranscripts") + theme(axis.text.x = element_text(face = "italic", angle = 45, hjust = 1), legend.position = "none")
+dev.off()
