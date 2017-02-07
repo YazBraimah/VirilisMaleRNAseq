@@ -1003,34 +1003,36 @@ crossSpecies.ALL.df = rbind(allAG.tmp, allEB.tmp, allTS.tmp)
 crossSpecies.ALL.df$Sig = ifelse(crossSpecies.ALL.df$FDR < 0.01, "YES", "NO")
 crossSpecies.ALL.df = merge(crossSpecies.ALL.df, gffRecord)
 
-# pdf("ManuscripPlots/Figure.S9.tiss-biased.volcanoPlots.pdf", width = 12, height = 6)
+# pdf("ManuscripPlots/Figure.S9.tiss-biased.volcanoPlots.pdf", width = 11.5, height = 5.3)
 ggplot() + 
-  geom_point(data = subset(crossSpecies.ALL.df, logFC > 0), aes (logFC, -log10(PValue), colour = Sig, size = S.right), alpha = 0.6) + 
-  geom_point(data = subset(crossSpecies.ALL.df, logFC < 0), aes (logFC, -log10(PValue), colour = Sig, size = S.left), alpha = 0.6) + 
+  geom_point(data = subset(crossSpecies.ALL.df, logFC > 2 & FDR < 0.001), aes (logFC, S.right, colour = S.right), alpha = 0.6) + 
+  geom_point(data = subset(crossSpecies.ALL.df, logFC < -2 & FDR < 0.001), aes (logFC, S.left, colour = S.left), alpha = 0.6) + 
   facet_grid(tissue~comparison, scales = "free") + 
-  geom_text_repel(data=subset(crossSpecies.ALL.df, S.left > 0.75 & logFC > 2 | S.right > 0.75 & logFC > 2), aes(logFC, -log10(PValue), label = gene_name), size =2.5, force = 10, point.padding = unit(0.5, "lines"), fontface = "bold.italic") + 
-  scale_colour_manual(values = c("#88d542", "#0eacc2")) + 
-  labs(size="cross-species\nspecificity", colour="FDR < 0.01?") +
+  # scale_colour_manual(values = c("#88d542", "#0eacc2")) + 
+  labs(colour="cross-species\nspecificity") +
   scale_size(range = c(-2, 2)) + 
-  ylab("-log10(p-value)") +
-  theme(axis.title.x = element_text(face = "bold", size = 12, vjust=0.1), axis.text.x=element_text(face = "bold", size = 8),axis.text.y = element_text(face = "bold", size = 12), axis.title.y = element_text(face = "bold.italic", size = 12, vjust=0.1), strip.text=element_text(face="bold.italic", size = 11))
+  theme_bw() + 
+  theme(axis.title.x = element_text(face = "bold", size = 12, vjust=0.1), axis.text.x=element_text(face = "bold", size = 12),axis.text.y = element_text(face = "bold", size = 12), axis.title.y = element_text(face = "bold.italic", size = 12, vjust=0.1), strip.text=element_text(face="bold.italic", size = 11), legend.position = "none")
 # dev.off()
 
 # SFP candidates
 allSFP.tmp$Sig = ifelse(allSFP.tmp$FDR < 0.01, "YES", "NO")
 allSFPs = merge(allSFP.tmp, gffRecord)
 
-# pdf("ManuscripPlots/Figure.NA.SFPs.volcanoPlots.pdf", width = 12.5, height = 2.73)
+# pdf("ManuscripPlots/Figure.NA.SFPs.volcanoPlots.pdf", width = 11.5, height = 2.5)
 ggplot() + 
-  geom_point(data = subset(allSFPs, logFC > 0), aes (logFC, -log10(PValue), colour = Sig, size = S.right), alpha = 0.7) + 
-  geom_point(data = subset(allSFPs, logFC < 0), aes (logFC, -log10(PValue), colour = Sig, size = S.left), alpha = 0.7) + 
+  geom_point(data = subset(allSFPs, logFC > 2 & FDR < 0.001), aes (logFC, S.right, colour = S.right)) + 
+  geom_point(data = subset(allSFPs, logFC < -2 & FDR < 0.001), aes (logFC, S.left, colour = S.left)) + 
   facet_grid(~comparison, scales = "free") + 
-  geom_text_repel(data=subset(allSFPs, S.right > 0.75 & logFC > 2 | S.left > 0.75 & logFC < -2), aes(logFC, -log10(PValue), label = gene_name), size =3.5, force = 30, fontface = "bold.italic", colour = "black") + 
-  scale_colour_manual(values = c("#88d542", "#0eacc2")) + 
-  labs(size="cross-species\nspecificity", colour="FDR < 0.01?") + 
-  scale_size(range = c(-3, 5)) + 
-  ylab("-log10(p-value)") +
-  theme(axis.title.x = element_text(face = "bold", size = 12, vjust=0.1), axis.text.x=element_text(face = "bold", size = 10), axis.text.y = element_text(face = "bold", size = 10), axis.title.y = element_text(face = "bold.italic", size = 12, vjust=0.1), strip.text=element_text(face="bold.italic", size = 12)) 
+  geom_vline(xintercept = 0, linetype="dashed", colour = "red") +
+  geom_text_repel(data=subset(allSFPs, S.right > 0.75 & logFC > 2), aes(logFC, S.right, label = gene_name), size =3, force = 30, fontface = "bold.italic", colour = "black") + 
+  geom_text_repel(data=subset(allSFPs, S.left > 0.75 & logFC < -2), aes(logFC, S.left, label = gene_name), size =3, force = 30, fontface = "bold.italic", colour = "black") +
+  # scale_colour_manual(values = c("#88d542", "#0eacc2")) + 
+  labs(colour="cross-species\nspecificity") + 
+  scale_size(range = c(0, 5)) + 
+  theme_bw() +
+  ylab("cross-species specificity") +
+  theme(axis.title.x = element_text(face = "bold", size = 12, vjust=0.1), axis.text.x=element_text(face = "bold", size = 12.5), axis.text.y = element_text(face = "bold", size = 12.5), axis.title.y = element_text(face = "bold.italic", size = 12, vjust=0.1), strip.text=element_text(face="bold.italic", size = 12), legend.position = "none")
 # dev.off()
 
 
@@ -1366,14 +1368,14 @@ ggplot(meanOmega.df, aes(Class, omega, colour=Class)) +
 paml.data$chromosome = factor (paml.data$chromosome, levels = c("Chr_X", "Chr_2", "Chr_3", "Chr_4", "Chr_5"))
 
 ## Define PMPZ QTL regions (from Ahmed-Braimah 2016, G3)
-C2inv.qtl = data.frame(xmin=17747413.5, xmax=34500000, ymin=0, ymax = 2.5, chromosome = "Chr_2")
-C5.qtl = data.frame(xmin=c(13800000, 16300000, 22800000), xmax=c(14750000, 21700000, 25000000), ymin=0, ymax = 2.5, chromosome = "Chr_5")
+C2inv.qtl = data.frame(xmin=17747413.5, xmax=34500000, ymin=0, ymax = 1.5, chromosome = "Chr_2")
+C5.qtl = data.frame(xmin=c(13800000, 16300000, 22800000), xmax=c(14750000, 21700000, 25000000), ymin=0, ymax = 1.5, chromosome = "Chr_5")
 
 (gg.SFP_and_EB=ggplot(subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` ), aes(max, omega, colour = I("#647700"))) + 
   geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") + 
   geom_point(size=2, alpha=0.75) + 
   facet_grid(~chromosome, scales = "free_x") + 
-  geom_point(data = subset(paml.data, FBgn_ID %in% EB_elements$`D.ame,D.lum,D.nov,D.vir`& chromosome != "scaffold_12481"), aes(colour = I("#b04fb0"))) + 
+  geom_point(data = subset(paml.data, FBgn_ID %in% EB.biased.SFP & chromosome != "scaffold_12481"), aes(colour = I("#b04fb0"))) + 
   geom_text_repel(data=subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` & omega > 0.8), aes(label = gene_name), size =3, force = 30, colour = "black") + 
   scale_colour_manual(name = "", values =c("#647700"="#647700","#b04fb0"="#b04fb0"), labels = c("SFPs","EB biased")) + 
   scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + 
