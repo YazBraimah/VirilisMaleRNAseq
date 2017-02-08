@@ -1,0 +1,115 @@
+---
+title: "Finding DeNovo transcripts"
+author: "Yasir Ahmed-Braimah"
+date: "1/26/2017"
+output:
+  html_document: default
+   
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+# Steps to find DeNovo transcripts
+
+1. Extract de novo transcripts that don't have dvir1.06 hits and write out list.
+
+```{r, eval=FALSE}
+amr.TS.dvir1.06.orths = subset(amrTrinotate, gene_id %in% amr.TS.list)[selectionCols]
+amr.TS.dvir1.06.orths = droplevels(amr.TS.dvir1.06.orths)
+amr.TS.dvir1.06.orths = amr.TS.dvir1.06.orths[order(amr.TS.dvir1.06.orths$dvir1.06_BlastX_topHit), ]
+amr.TS.dvir1.06.orths[is.na(amr.TS.dvir1.06.orths)] = "NoHit"
+amr.TS.dvir1.06.orths = subset(amr.TS.dvir1.06.orths, prot_id != "NoHit")
+amr.TS.dvir1.06.orths = aggregate(gene_id~dvir1.06_BlastX_topHit, data = amr.TS.dvir1.06.orths, toString)
+amr.TS_no_dvir1.06_hits = subset(amr.TS.dvir1.06.orths, dvir1.06_BlastX_topHit == "NoHit")$gene_id
+amr.TS_no_dvir1.06_hits = unique(strsplit(amr.TS_no_dvir1.06_hits, ", ")[[1]])
+write.table(amr.TS_no_dvir1.06_hits, file = "Sequence.Files/amr.TS_no_dvir106_hits.list", quote = F, row.names = F, col.names = F)
+```
+add a dash to the end of the list.
+```{bash, eval=FALSE}
+sed 's/$/_/g' amr.TS_no_dvir106_hits.list > amr.TS_no_dvir_hits.list
+```
+2. Extract transcript seuqences for list above
+```{bash, eval=FALSE}
+fastagrep.pl -f amr.TS_no_dvir_hits.list all.transcriptomes.nt > amr.candidate.deNovo.TS-biased.fasta
+```
+
+3. BLAST this file against the species' respective De Novo genome, and extract the seuqnces that have genome hits:
+
+```{bash, eval=F}
+blastn -query amr.candidate.deNovo.TS-biased.fasta -db amr.genome.fasta -outfmt 6 | awk '{print $1}' | sort -u | fastagrep.pl -f - amr.candidate.deNovo.TS-biased.fasta > amr.candidate.deNovo.withGenomeSeq.TS-biased.fasta
+```
+
+4. BLAST the sequence output from previous step against all transcriptome seuqences (there should be no hits matching the dvir1.06 genes)
+
+```{bash, eval=F}
+blastn -query amr.candidate.deNovo.withGenomeSeq.TS-biased.fasta -db all.transcriptomes.nt -outfmt 6 > amr.candidate.deNovo.withGenomeSeq.TS-biased.BlastN.with.other.transcriptomes.outfmt6
+```
+5. Remove hits to self:
+
+```{bash, eval=F}
+grep "lum\|vir\|nov" amr.candidate.deNovo.withGenomeSeq.TS-biased.BlastN.with.other.transcriptomes.outfmt6 > amr.candidate.deNovo.withGenomeSeq.TS-biased.BlastN.with.other.transcriptomes.notSelf.outfmt6
+```
+
+6. Comparing the original tissue-biased gene list to the above output should give transcripts that are unique to the species being analyzed:
+
+```{bash, eval=F}
+awk '{print $1}' amr.candidate.deNovo.withGenomeSeq.TS-biased.BlastN.with.other.transcriptomes.notSelf.outfmt6 | sed 's/_i.*/_/g' | sort -u | compare_lists.sh - amr.TS_no_dvir_hits.list | sed 's/_$//g' >  amr.candidate.deNovo.TS-biased.CHECK.list
+```
+
+7. Create a fasta file from the list above to double check the BLAST results in Geneious
+```{bash, eval=F}
+sed 's/$/_/g' amr.candidate.deNovo.TS-biased.CHECK.list | fastagrep.pl -f - all.transcriptomes.nt> amr.candidate.deNovo.TS-biased.CHECK.fasta
+```
+
+8. Loop over candidate list to extract ortholgous sequences in the other species.
+```{bash, eval=F}
+cat amr.TS_no_dvir_hits.list | while read line; do grep $line amr.candidate.deNovo.withGenomeSeq.TS-biased.BlastN.with.other.transcriptomes.notSelf.outfmt6 | sed 's/_i.//g' | awk '{print $1"\t"$2}' | tr '\t' '\n' | sort -u | tr '\n' '\t' | sed '/^$/d' >> amr.candidate.deNovo.TS-biased.orthos.txt ; done
+```
+
+9. Output annotation information for the candidate list
+```{r, eval=F}
+amrDeNovo.TS = read.table("Sequence.Files/amr.candidate.deNovo.TS-biased.CHECK.list")
+amrDeNovo.TS = as.character(amrDeNovo.TS$V1)
+amrDeNovo.TS.geneInfo = sapply(amrDeNovo.TS, geneLookupT, Trinotate_file = amrTrinotate, complete =T)
+for (i in names(amrDeNovo.TS.geneInfo)){
+  write.table(amrDeNovo.TS.geneInfo[[i]], paste("GeneInfo/DeNovo/amr.TS.", i, ".txt", sep=""), quote = F, col.names = F, sep = "\t")
+}
+```
+
+10. Stitch the outputs together and transpose
+```{bash, eval=F}
+cat DeNovo/amr.TS.amr_c* | transposer.sh - > amrDeNovo.TS.geneInfo.txt
+```
+
+11. Repeat this process for each tissue-type and species.
+
+
+***
+
+One script frmat:
+```{bash, eval = F}
+#!/bin/bash
+
+sed 's/$/_/g' amr.TS_no_dvir106_hits.list > amr.TS_no_dvir_hits.list
+
+fastagrep.pl -f amr.TS_no_dvir_hits.list all.transcriptomes.nt > amr.candidate.deNovo.TS-biased.fasta
+
+blastn -query amr.candidate.deNovo.TS-biased.fasta -db amr.genome.nt -outfmt 6 | awk '{print $1}' | sort -u | fastagrep.pl -f - amr.candidate.deNovo.TS-biased.fasta > amr.candidate.deNovo.withGenomeSeq.TS-biased.fasta
+
+blastn -query amr.candidate.deNovo.withGenomeSeq.TS-biased.fasta -db all.transcriptomes.nt -outfmt 6 > amr.candidate.deNovo.withGenomeSeq.TS-biased.BlastN.with.other.transcriptomes.outfmt6
+
+grep "lum\|vir\|nov" amr.candidate.deNovo.withGenomeSeq.TS-biased.BlastN.with.other.transcriptomes.outfmt6 > amr.candidate.deNovo.withGenomeSeq.TS-biased.BlastN.with.other.transcriptomes.notSelf.outfmt6
+
+awk '{print $1}' amr.candidate.deNovo.withGenomeSeq.TS-biased.BlastN.with.other.transcriptomes.notSelf.outfmt6 | sed 's/_i.*/_/g' | sort -u | compare_lists.sh - amr.TS_no_dvir_hits.list | sed 's/_$//g' >  amr.candidate.deNovo.TS-biased.CHECK.list
+
+cat amr.TS_no_dvir_hits.list | while read line; do grep $line amr.candidate.deNovo.withGenomeSeq.TS-biased.BlastN.with.other.transcriptomes.notSelf.outfmt6 | sed 's/_i.//g' | awk '{print $1"\t"$2}' | tr '\t' '\n' | sort -u | tr '\n' '\t' | sed '/^$/d' >> amr.candidate.deNovo.TS-biased.orthos.txt ; done
+
+sed 's/$/_/g' amr.candidate.deNovo.TS-biased.CHECK.list | fastagrep.pl -f - all.transcriptomes.nt> amr.candidate.deNovo.TS-biased.CHECK.fasta
+
+rm amr.candidate.deNovo.withGenomeSeq.*
+
+```
