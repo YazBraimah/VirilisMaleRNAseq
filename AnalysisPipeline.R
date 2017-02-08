@@ -1368,30 +1368,50 @@ ggplot(meanOmega.df, aes(Class, omega, colour=Class)) +
 paml.data$chromosome = factor (paml.data$chromosome, levels = c("Chr_X", "Chr_2", "Chr_3", "Chr_4", "Chr_5"))
 
 ## Define PMPZ QTL regions (from Ahmed-Braimah 2016, G3)
-C2inv.qtl = data.frame(xmin=17747413.5, xmax=34500000, ymin=0, ymax = 1.5, chromosome = "Chr_2")
-C5.qtl = data.frame(xmin=c(13800000, 16300000, 22800000), xmax=c(14750000, 21700000, 25000000), ymin=0, ymax = 1.5, chromosome = "Chr_5")
+C2inv.qtl.low = data.frame(xmin=17747413.5, xmax=34500000, ymin=0, ymax = 1.5, chromosome = "Chr_2")
+C5.qtl.low = data.frame(xmin=c(13800000, 16300000, 22800000), xmax=c(14750000, 21700000, 25000000), ymin=0, ymax = 1.5, chromosome = "Chr_5")
 
+C2inv.qtl.high = data.frame(xmin=17747413.5, xmax=34500000, ymin=0, ymax = 2.5, chromosome = "Chr_2")
+C5.qtl.high = data.frame(xmin=c(13800000, 16300000, 22800000), xmax=c(14750000, 21700000, 25000000), ymin=0, ymax = 2.5, chromosome = "Chr_5")
+
+EB.biased.SFP = unique(subset(grpTrinotate, FBgn_ID %in% EB_elements$`D.ame,D.lum,D.nov,D.vir` & SignalP == "YES")$FBgn_ID)
+
+# pdf("ManuscripPlots/Figure.SFP.omegaAcrossChrs.pdf", width = 8.7, height = 1.8)
 (gg.SFP_and_EB=ggplot(subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` ), aes(max, omega, colour = I("#647700"))) + 
   geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") + 
-  geom_point(size=2, alpha=0.75) + 
+  geom_point(size=2.5, alpha=0.75) + 
   facet_grid(~chromosome, scales = "free_x") + 
-  geom_point(data = subset(paml.data, FBgn_ID %in% EB.biased.SFP & chromosome != "scaffold_12481"), aes(colour = I("#b04fb0"))) + 
-  geom_text_repel(data=subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` & omega > 0.8), aes(label = gene_name), size =3, force = 30, colour = "black") + 
-  scale_colour_manual(name = "", values =c("#647700"="#647700","#b04fb0"="#b04fb0"), labels = c("SFPs","EB biased")) + 
+  geom_point(data = subset(paml.data, FBgn_ID %in% EB.biased.SFP & chromosome != "scaffold_12481"), aes(colour = I("#b04fb0")), size = 2.5) + 
+  geom_text_repel(data=subset(paml.data, FBgn_ID %in% SFP_elements$`D.ame,D.lum,D.nov,D.vir` & omega > 0.8), aes(label = gene_name), size =3, force = 10, colour = "black", fontface=3) +
+  scale_colour_manual(name = "SFPs", values =c("#647700"="#647700","#b04fb0"="#b04fb0"), labels = c("AG-derived","EB-derived")) + 
   scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + 
   xlab ("Chromosome coordinates (Mb)") +
   ylab(expression(omega)) + 
-  geom_rect(data=C2inv.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill="red"), alpha=0.1, inherit.aes = FALSE) + 
-  geom_rect(data=C5.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="red", alpha=0.1, inherit.aes = FALSE) + 
-  scale_fill_manual(name = '', values = "red",labels = "PMPZ\nQTL region") +
+  geom_rect(data=C2inv.qtl.low, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill="red"), alpha=0.1, inherit.aes = FALSE) + 
+  geom_rect(data=C5.qtl.low, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="red", alpha=0.1, inherit.aes = FALSE) + 
+  scale_fill_manual(name = '', values = "red", labels = "PMPZ\nQTL region") +
   theme_bw())
+# dev.off()
+
+(gg.EB=ggplot(subset(paml.data, FBgn_ID %in% EB_elements$`D.ame,D.lum,D.nov,D.vir` & chromosome != "scaffold_12481"), aes(max, omega, colour = I("#b04fb0"))) + 
+    geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") + 
+    geom_point(size=2, alpha=0.75) + 
+    facet_grid(~chromosome, scales = "free_x") + 
+    scale_colour_manual(name = "", values =c("#b04fb0"="#b04fb0"), labels = c("EB-biased")) + 
+    scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + 
+    xlab ("Chromosome coordinates (Mb)") +
+    ylab(expression(omega)) + 
+    geom_rect(data=C2inv.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, fill="red"), alpha=0.1, inherit.aes = FALSE) + 
+    geom_rect(data=C5.qtl, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), fill="red", alpha=0.1, inherit.aes = FALSE) + 
+    scale_fill_manual(name = '', values = "red",labels = "PMPZ\nQTL region") +
+    theme_bw())
 
 (gg.AG=ggplot(subset(paml.data, FBgn_ID %in% AG_elements$`D.ame,D.lum,D.nov,D.vir` & omega < 900 & grepl("Chr", chromosome) & FBgn_ID %!in% SFP_elements$`D.ame,D.lum,D.nov,D.vir`), aes(max, omega, colour = I("#f0cc35"))) + 
-  geom_point(alpha=0.55) + 
+  geom_point(alpha=0.85) + 
   facet_grid(~chromosome, scale = "free_x") + 
   scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + 
   xlab ("Chromosome coordinates (Mb)") + 
-  scale_colour_manual(name = "", values ="#f0cc35", labels = "Acc. Gl.\nbiased") + 
+  scale_colour_manual(name = "", values ="#f0cc35", labels = "AG-biased") + 
   scale_y_continuous(breaks=c(0.0,0.5,1.0,1.5,2.0,2.5), labels=expression("0.0", "0.5", "1.0", "1.5", "2.0", "2.5")) + 
   geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") +
   ylab(expression(omega)) +
@@ -1405,7 +1425,7 @@ C5.qtl = data.frame(xmin=c(13800000, 16300000, 22800000), xmax=c(14750000, 21700
   facet_grid(~chromosome, scale = "free_x") + 
   scale_x_continuous(breaks=c(5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels=expression("5", "10", "15", "20", "25", "30")) + 
   xlab ("Chromosome coordinates (Mb)") + 
-  scale_colour_manual(name = "", values ="#cb6751", labels = "Testes\nbiased") + 
+  scale_colour_manual(name = "", values ="#cb6751", labels = "Testes-\nbiased") + 
   scale_y_continuous(breaks=c(0.0,0.5,1.0,1.5,2.0,2.5), labels=expression("0.0", "0.5", "1.0", "1.5", "2.0", "2.5")) + 
   geom_hline(yintercept = genome.avg.omega, linetype="dashed", colour = "red") +
   ylab(expression(omega)) +
@@ -1414,8 +1434,8 @@ C5.qtl = data.frame(xmin=c(13800000, 16300000, 22800000), xmax=c(14750000, 21700
   scale_fill_manual(name = '', values = "red",labels = "PMPZ\nQTL region") +
   theme_bw())
 
-# pdf("ManuscripPlots/Figure.NA.omegaAcrossChrs.pdf", width = 8.5, height = 5.6)
-plot_grid(gg.SFP_and_EB, gg.AG, gg.TS, ncol = 1)
+# pdf("ManuscripPlots/Figure.NA.omegaAcrossChrs.pdf", width = 8.7, height = 4.8)
+plot_grid(gg.EB, gg.AG, gg.TS, ncol = 1)
 # dev.off()
 
 ###################
