@@ -9,28 +9,30 @@
 #  
 
 
-## Load annotations
+
+
+## Load Trinotate annotation files
 grpTrinotate = read.csv("Annotations/Trinotate_report_dvir1.06_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
 amrTrinotate = read.csv("Annotations/Trinotate_report_amrTrin3_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
 lumTrinotate = read.csv("Annotations/Trinotate_report_lumTrin3_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
 novTrinotate = read.csv("Annotations/Trinotate_report_novTrin3_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
 virTrinotate = read.csv("Annotations/Trinotate_report_virTrin3_subset.txt", header = T, sep = "\t", na.strings = ".", stringsAsFactors=FALSE)
 
+## Load dvir1.06 gene coordinates and Trinity orthologues
 gffRecord = read.table("Annotations/FBgn_ID_name_coordinates.txt", header = T)
 TrinOrths = read.table("Annotations/Trin3.orthology.txt", header = T, sep = "\t")
 VettOrths = read.table("Annotations/Vetted.orthologs_dvir2.1.txt", header = T, sep = "\t")
 
-## Load mel ortholog info
+## Load D. melanogaster orthology, SFP list, and expression data
 melOrths = read.table(file = "Other.Drosophilas/Dmel/mel_orths.txt", header = T)
 melSFPs = read.table(file = "Other.Drosophilas/Dmel/ACPlist.Findlay.20130301.txt", header = T, sep = "\t")
 melRPKM = read.table(file = "Other.Drosophilas/Dmel/mel.modEncode.RPKM.matrix", header = T, sep = "\t")
 
-
-## Combine mel info with dvir1.06 Trinotate annotation
+## Combine D. melanogaster orthology with dvir1.06 Trinotate annotation
 melOrthsAll = aggregate(mel_GeneSymbol~FBgn_ID, data = melOrths, toString)
 Annots = merge(merge(melOrthsAll, grpTrinotate, all=TRUE), gffRecord, all=TRUE)
 
-## Read in sample info:
+## Load RNAseq sample/replicate info
 grpSamples_data = read.table("Annotations/samples.txt", header=F, check.names=F, fill=T)
 grpSamples_data = grpSamples_data[grpSamples_data[,2] != '',]
 amrSamples_data = subset(grpSamples_data, grepl("amr", grpSamples_data$V1))
@@ -38,7 +40,7 @@ lumSamples_data = subset(grpSamples_data, grepl("lum", grpSamples_data$V1))
 novSamples_data = subset(grpSamples_data, grepl("nov", grpSamples_data$V1))
 virSamples_data = subset(grpSamples_data, grepl("vir", grpSamples_data$V1))
 
-## Read in PAML and KaKs data 
+## Load PAML and Ka/Ks data 
 tmp.FB.names = unique(subset(Annots, select=c("FBgn_ID", "FBtr_ID")))
 paml.data = read.csv(file = "PAML.Files/PAML.branchSite.ALL.results.txt", header = T, sep = "\t")
 paml.data = merge(tmp.FB.names, paml.data, all=T)
@@ -68,7 +70,7 @@ paml.data$DamrNov_LRT = 2*(paml.data$DamrNov_brSt_H1 - paml.data$DamrNov_brSt_H0
 paml.data$DamrNov_pValue = pchisq(q = paml.data$DamrNov_LRT, df = 1, lower.tail = F)
 paml.data$DamrNov_FDR = p.adjust(p = paml.data$DamrNov_pValue, method = "fdr")
 
-## Read in count and TPM matrices:
+## Load count and TPM matrices:
 # all samples mapped to dvir1.06 transcriptome:
 grpCountsMatrix = read.table("ExpressionData/genes_dvir1.06_allSamples.counts.matrix", header=T, row.names=1, com='', check.names=F)
 grpTpmMatrix.notCrossNorm = read.table("ExpressionData/genes_dvir1.06_allSamples.TPM.not_cross_norm.counts_by_min_TPM", header = T)
@@ -98,12 +100,12 @@ libSizes = as.data.frame(colSums(grpCountsMatrix))
 libSizes = cbind(sample = row.names(libSizes), libSizes)
 row.names(libSizes)= NULL
 colnames(libSizes) = c("sample", "Total_reads")
-# pdf("ManuscripPlots/Figure.S1.libSizes.pdf", width = 5.5, height = 3.2)
+pdf("Plots/Figure.libSizes.pdf", width = 5.5, height = 3.2)
 ggplot(libSizes, aes(sample, Total_reads)) + 
   geom_bar(stat="identity") + 
   theme(axis.text.x = element_text(angle = -90, hjust = 0)) + 
   geom_hline(yintercept = 20000000)
-# dev.off()
+dev.off()
 
 ## Boxplot of log10(TPM) across all samples
 m.expData=melt(as.matrix(grpTmmMatrix))
@@ -112,15 +114,15 @@ m.expData.exp= cSplit(as.data.frame(m.expData), "replicate", "_")
 m.expData=data.frame(m.expData, m.expData.exp$replicate_1, m.expData.exp$replicate_2, m.expData.exp$replicate_3)
 colnames(m.expData) = c("gene_id", "replicate", "TPM", "species", "tissue", "rep_num")
 m.expData$TPM = m.expData$TPM + 1
-# pdf("ManuscripPlots/Figure.S2.expData_by_sample.pdf", width = 5.5, height = 3.7)
+pdf("Plots/Figure.expData_by_sample.pdf", width = 5.5, height = 3.7)
 ggplot(m.expData) + 
   geom_boxplot(aes(x = replicate, y = log10(TPM), fill = species, colour = tissue), size = 0.3, alpha = I(1/3)) + 
   theme(axis.text.x = element_text(angle = -90, hjust = 0)) + 
   scale_fill_hue(l = 50, h.start = 200)
-# dev.off()
+dev.off()
 
  
-# ## Estimate of the number of expressed genes (Brian Haas' method)
+# ## Estimate the number of expressed genes (Brian Haas' method)
 # extract the data between 10 TPM and 100 TPM
 amr_filt_data = amrTpmMatrix.notCrossNorm[amrTpmMatrix.notCrossNorm[,1] > -100 & amrTpmMatrix.notCrossNorm[,1] < -10,]
 lum_filt_data = lumTpmMatrix.notCrossNorm[lumTpmMatrix.notCrossNorm[,1] > -100 & lumTpmMatrix.notCrossNorm[,1] < -10,]
@@ -144,9 +146,9 @@ lum_fit_plot=ggplot(lumTpmMatrix.notCrossNorm, aes(neg_min_tpm,num_features)) + 
 nov_fit_plot=ggplot(novTpmMatrix.notCrossNorm, aes(neg_min_tpm,num_features)) + geom_point() + scale_x_continuous(limits=c(-100,0)) + scale_y_continuous(limits=c(0,20000)) + geom_smooth(data=nov_filt_data, method = "lm") + geom_hline(yintercept = 13646, colour = "green") + ggtitle("novTrinity")
 vir_fit_plot=ggplot(virTpmMatrix.notCrossNorm, aes(neg_min_tpm,num_features)) + geom_point() + scale_x_continuous(limits=c(-100,0)) + scale_y_continuous(limits=c(0,20000)) + geom_smooth(data=vir_filt_data, method = "lm") + geom_hline(yintercept = 14616, colour = "green") + ggtitle("virTrinity")
 grp_fit_plot=ggplot(grpTpmMatrix.notCrossNorm, aes(neg_min_tpm,num_features)) + geom_point() + scale_x_continuous(limits=c(-100,0)) + scale_y_continuous(limits=c(0,20000)) + geom_smooth(data=grp_filt_data, method = "lm") + geom_hline(yintercept = 9474, colour = "green") + ggtitle("dvir_1.06")
-# pdf("ManuscripPlots/Figure.S3.linearReg_of_expGenes.pdf", width = 5.7, height = 3.7)
+pdf("Plots/Figure.linearReg_of_expGenes.pdf", width = 5.7, height = 3.7)
 plot_grid(amr_fit_plot, lum_fit_plot, nov_fit_plot, vir_fit_plot, grp_fit_plot,nrow = 2)
-# dev.off()
+dev.off()
 
 
 ## calculate dispersion
@@ -156,13 +158,14 @@ d = estimateCommonDisp(d)
 d = estimateTagwiseDisp(d)
 summary(d$tagwise.dispersion)
 ## Plot biological coefficient of variation
-# pdf("ManuscripPlots/Figure.S4.BCV.pdf", width = 5.5, height = 3.2)
+pdf("Plots/Figure.BCV.pdf", width = 5.5, height = 3.2)
 plotBCV(d)
-# dev.off()
+dev.off()
+
 ## Plot grouping of samples
-# pdf("ManuscripPlots/Figure.S5.MDS.pdf", width = 6.5, height = 5.6)
+pdf("Plots/Figure.MDS.pdf", width = 6.5, height = 5.6)
 plotMDS(d, method = "bcv", col=as.numeric(d$samples$group))
-# dev.off()
+dev.off()
 
 ## Plot sample correlation
 data = log2(grpCountsMatrix+1)
@@ -170,11 +173,11 @@ data = as.matrix(data)
 sample_cor = cor(data, method='pearson', use='pairwise.complete.obs')
 sample_dist = as.dist(1-sample_cor)
 hc_samples = hclust(sample_dist, method='complete')
-# pdf("ManuscripPlots/Figure.S6.sampleCorr.pdf", width = 8.6, height = 7.8)
+pdf("Plots/Figure.sampleCorr.pdf", width = 8.6, height = 7.8)
 heatmap.3(sample_cor, dendrogram='both', Rowv=as.dendrogram(hc_samples), Colv=as.dendrogram(hc_samples), col = colorpanel(75, '#dd70cd','black','#afc64f'), scale='none', symm=TRUE, key=TRUE,density.info='none', trace='none', symkey=FALSE, symbreaks=F, margins=c(10,10), cexCol=0.8, cexRow=0.8, cex.main=1.8, main=paste("sample correlation matrix\n(all replicates)"))
-# dev.off()
+dev.off()
 
-# normalize by DESeq method:
+# normalize by DESeq method for repicate comparisons
 meta = data.frame(row.names=colnames(grpCountsMatrix), condition=grpSamples_data$V1)
 grpCountData=round(grpCountsMatrix)
 grpCountData_normByDESeq = newCountDataSet(grpCountData, meta)
@@ -189,7 +192,7 @@ amr.EB.1_vs_amr.EB.2 = MA_BPlot(grpCountData_normByDESeq, "amr_EB_1", "amr_EB_2"
 amr.TS.1_vs_amr.TS.2 = MA_BPlot(grpCountData_normByDESeq, "amr_TS_1", "amr_TS_2")
 amr.TS.1_vs_amr.TS.3 = MA_BPlot(grpCountData_normByDESeq, "amr_TS_1", "amr_TS_3")
 amr.TS.2_vs_amr.TS.3 = MA_BPlot(grpCountData_normByDESeq, "amr_TS_2", "amr_TS_3")
-# pdf("ManuscripPlots/Figure.S7a.crossRep.Damr.pdf", width = 16.8, height = 12)
+pdf("Plots/Figure.crossRep.Damr.pdf", width = 16.8, height = 12)
 plot_grid(amr.AG.1_vs_amr.AG.2, amr.AG.1_vs_amr.AG.3, amr.AG.2_vs_amr.AG.3, amr.EB.1_vs_amr.EB.2, amr.TS.1_vs_amr.TS.2, amr.TS.1_vs_amr.TS.3, amr.TS.2_vs_amr.TS.3, ncol = 2, nrow = 4)
 # dev.off()
 
@@ -200,9 +203,9 @@ lum.EB.1_vs_lum.EB.2 = MA_BPlot(grpCountData_normByDESeq, "lum_EB_1", "lum_EB_2"
 lum.TS.1_vs_lum.TS.2 = MA_BPlot(grpCountData_normByDESeq, "lum_TS_1", "lum_TS_2")
 lum.TS.1_vs_lum.TS.3 = MA_BPlot(grpCountData_normByDESeq, "lum_TS_1", "lum_TS_3")
 lum.TS.2_vs_lum.TS.3 = MA_BPlot(grpCountData_normByDESeq, "lum_TS_2", "lum_TS_3")
-# pdf("ManuscripPlots/Figure.S7b.crossRep.Dlum.pdf", width = 16.8, height = 12)
+pdf("Plots/Figure.crossRep.Dlum.pdf", width = 16.8, height = 12)
 plot_grid(lum.AG.1_vs_lum.AG.2, lum.AG.1_vs_lum.AG.3, lum.AG.2_vs_lum.AG.3, lum.EB.1_vs_lum.EB.2, lum.TS.1_vs_lum.TS.2, lum.TS.1_vs_lum.TS.3, lum.TS.2_vs_lum.TS.3, ncol = 2, nrow = 4)
-# dev.off()
+dev.off()
 
 nov.AG.1_vs_nov.AG.2 = MA_BPlot(grpCountData_normByDESeq, "nov_AG_1", "nov_AG_2")
 nov.AG.1_vs_nov.AG.3 = MA_BPlot(grpCountData_normByDESeq, "nov_AG_1", "nov_AG_3")
@@ -211,9 +214,9 @@ nov.EB.1_vs_nov.EB.2 = MA_BPlot(grpCountData_normByDESeq, "nov_EB_1", "nov_EB_2"
 nov.TS.1_vs_nov.TS.2 = MA_BPlot(grpCountData_normByDESeq, "nov_TS_1", "nov_TS_2")
 nov.TS.1_vs_nov.TS.3 = MA_BPlot(grpCountData_normByDESeq, "nov_TS_1", "nov_TS_3")
 nov.TS.2_vs_nov.TS.3 = MA_BPlot(grpCountData_normByDESeq, "nov_TS_2", "nov_TS_3")
-# pdf("ManuscripPlots/Figure.S7c.crossRep.Dnov.pdf", width = 16.8, height = 12)
+pdf("Plots/Figure.crossRep.Dnov.pdf", width = 16.8, height = 12)
 plot_grid(nov.AG.1_vs_nov.AG.2, nov.AG.1_vs_nov.AG.3, nov.AG.2_vs_nov.AG.3, nov.EB.1_vs_nov.EB.2, nov.TS.1_vs_nov.TS.2, nov.TS.1_vs_nov.TS.3, nov.TS.2_vs_nov.TS.3, ncol = 2, nrow = 4)
-# dev.off()
+dev.off()
 
 vir.AG.1_vs_vir.AG.2 = MA_BPlot(grpCountData_normByDESeq, "vir_AG_1", "vir_AG_2")
 vir.AG.1_vs_vir.AG.3 = MA_BPlot(grpCountData_normByDESeq, "vir_AG_1", "vir_AG_3")
@@ -222,9 +225,9 @@ vir.EB.1_vs_vir.EB.2 = MA_BPlot(grpCountData_normByDESeq, "vir_EB_1", "vir_EB_2"
 vir.TS.1_vs_vir.TS.2 = MA_BPlot(grpCountData_normByDESeq, "vir_TS_1", "vir_TS_2")
 vir.TS.1_vs_vir.TS.3 = MA_BPlot(grpCountData_normByDESeq, "vir_TS_1", "vir_TS_3")
 vir.TS.2_vs_vir.TS.3 = MA_BPlot(grpCountData_normByDESeq, "vir_TS_2", "vir_TS_3")
-# pdf("ManuscripPlots/Figure.S7d.crossRep.Dvir.pdf", width = 16.8, height = 12)
+pdf("Plots/Figure.crossRep.Dvir.pdf", width = 16.8, height = 12)
 plot_grid(vir.AG.1_vs_vir.AG.2, vir.AG.1_vs_vir.AG.3, vir.AG.2_vs_vir.AG.3, vir.EB.1_vs_vir.EB.2, vir.TS.1_vs_vir.TS.2, vir.TS.1_vs_vir.TS.3, vir.TS.2_vs_vir.TS.3, ncol = 2, nrow = 4)
-# dev.off()
+dev.off()
 
 
 ## Filter count data by minimum count across ANY sample (200 in this case)
@@ -239,17 +242,12 @@ novCountsMatrix.min200count = novCountsMatrix[nov_max_gene_expr_per_row >= 200,,
 virCountsMatrix.min200count = virCountsMatrix[vir_max_gene_expr_per_row >= 200,,drop=F ]
 grpCountsMatrix.min200count = grpCountsMatrix[grp_max_gene_expr_per_row >= 200,,drop=F ]
 
-## Filter data by minimum CPM across ANY sample
-# d.byCPM = d
-# head(cpm(d.byCPM))
-# apply(d.byCPM$counts, 2, sum)
-# keep = rowSums(cpm(d.byCPM)>10) >= 2
-# countsMatrix.min10CPM = d.byCPM[keep,]
-# dim(countsMatrix.min10CPM)
+##################################### End QC ###########################################
 
 
 #########################################################################################
-### Summary TPM table and matrix for gene level plots (includes all replicates) ######### 
+### Summary TPM table (mean, se, sd) and matrix for gene level plots  ###################
+
 # dvir1.06
 grpTPM.tmp=grpTmmMatrix
 colnames(grpTPM.tmp) = grpSamples_data$V1
@@ -258,50 +256,48 @@ m.grpTPM.tmp = cSplit(as.data.frame(m.grpTPM.tmp), "X2", "_")
 m.grpTPM.tmp = data.frame(m.grpTPM.tmp$X1, m.grpTPM.tmp$X2_1, m.grpTPM.tmp$X2_2, m.grpTPM.tmp$value)
 colnames(m.grpTPM.tmp) = c("FBgn_ID", "species", "tissue", "TPM")
 m.grpTPM.tmp.c = summarySE(m.grpTPM.tmp, measurevar = "TPM", groupvars = c("FBgn_ID", "species", "tissue"))
-# fbgn_to_geneName=subset(gffRecord, select=c(FBgn_ID, gene_name))
-# TPMse = merge(fbgn_to_geneName, m.grpTPM.tmp.c, all=TRUE)
-# write.table(x = TPMse, file = "ExpressionData/dvir1.06_TPMse.txt", quote = F, sep = "\t", row.names = F)
-TPMse = read.table(file = "ExpressionData/dvir1.06_TPMse.txt", header = T, sep = "\t")
+fbgn_to_geneName=subset(gffRecord, select=c(FBgn_ID, gene_name))
+TPMse = merge(fbgn_to_geneName, m.grpTPM.tmp.c, all=TRUE)
 grpMeanTPMmatrix=cast(m.grpTPM.tmp.c, FBgn_ID~species+tissue, value ="TPM")
-# # amrTrinity
-# amrTPM.tmp=amrTmmMatrix
-# colnames(amrTPM.tmp) = amrSamples_data$V1
-# m.amrTPM.tmp = as.data.frame(melt(as.matrix(amrTPM.tmp)))
-# m.amrTPM.tmp = cSplit(as.data.frame(m.amrTPM.tmp), "X2", "_")
-# m.amrTPM.tmp=data.frame(m.amrTPM.tmp$X1, m.amrTPM.tmp$X2_1, m.amrTPM.tmp$X2_2, m.amrTPM.tmp$value)
-# colnames(m.amrTPM.tmp) = c("trinity_id", "species", "tissue", "TPM")
-# TPMse_amrTrin = summarySE(m.amrTPM.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
-TPMse_amrTrin = read.table("ExpressionData/amrTrin3_TPMse.txt", header = T, sep = "\t")
+
+# amrTrinity
+amrTPM.tmp=amrTmmMatrix
+colnames(amrTPM.tmp) = amrSamples_data$V1
+m.amrTPM.tmp = as.data.frame(melt(as.matrix(amrTPM.tmp)))
+m.amrTPM.tmp = cSplit(as.data.frame(m.amrTPM.tmp), "X2", "_")
+m.amrTPM.tmp=data.frame(m.amrTPM.tmp$X1, m.amrTPM.tmp$X2_1, m.amrTPM.tmp$X2_2, m.amrTPM.tmp$value)
+colnames(m.amrTPM.tmp) = c("trinity_id", "species", "tissue", "TPM")
+TPMse_amrTrin = summarySE(m.amrTPM.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 amrMeanTPMmatrix=cast(TPMse_amrTrin, trinity_id~species+tissue, value ="TPM")
-# # lumTrinity
-# lumTPM.tmp=lumTmmMatrix
-# colnames(lumTPM.tmp) = lumSamples_data$V1
-# m.lumTPM.tmp = as.data.frame(melt(as.matrix(lumTPM.tmp)))
-# m.lumTPM.tmp = cSplit(as.data.frame(m.lumTPM.tmp), "X2", "_")
-# m.lumTPM.tmp=data.frame(m.lumTPM.tmp$X1, m.lumTPM.tmp$X2_1, m.lumTPM.tmp$X2_2, m.lumTPM.tmp$value)
-# colnames(m.lumTPM.tmp) = c("trinity_id", "species", "tissue", "TPM")
-# TPMse_lumTrin = summarySE(m.lumTPM.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
-TPMse_lumTrin = read.table("ExpressionData/lumTrin3_TPMse.txt", header = T, sep = "\t")
+
+# lumTrinity
+lumTPM.tmp=lumTmmMatrix
+colnames(lumTPM.tmp) = lumSamples_data$V1
+m.lumTPM.tmp = as.data.frame(melt(as.matrix(lumTPM.tmp)))
+m.lumTPM.tmp = cSplit(as.data.frame(m.lumTPM.tmp), "X2", "_")
+m.lumTPM.tmp=data.frame(m.lumTPM.tmp$X1, m.lumTPM.tmp$X2_1, m.lumTPM.tmp$X2_2, m.lumTPM.tmp$value)
+colnames(m.lumTPM.tmp) = c("trinity_id", "species", "tissue", "TPM")
+TPMse_lumTrin = summarySE(m.lumTPM.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 lumMeanTPMmatrix=cast(TPMse_lumTrin, trinity_id~species+tissue, value ="TPM")
-# # novTrinity
-# novTPM.tmp=novTmmMatrix
-# colnames(novTPM.tmp) = novSamples_data$V1
-# m.novTPM.tmp = as.data.frame(melt(as.matrix(novTPM.tmp)))
-# m.novTPM.tmp = cSplit(as.data.frame(m.novTPM.tmp), "X2", "_")
-# m.novTPM.tmp=data.frame(m.novTPM.tmp$X1, m.novTPM.tmp$X2_1, m.novTPM.tmp$X2_2, m.novTPM.tmp$value)
-# colnames(m.novTPM.tmp) = c("trinity_id", "species", "tissue", "TPM")
-# TPMse_novTrin = summarySE(m.novTPM.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
-TPMse_novTrin = read.table("ExpressionData/novTrin3_TPMse.txt", header = T, sep = "\t")
+
+# novTrinity
+novTPM.tmp=novTmmMatrix
+colnames(novTPM.tmp) = novSamples_data$V1
+m.novTPM.tmp = as.data.frame(melt(as.matrix(novTPM.tmp)))
+m.novTPM.tmp = cSplit(as.data.frame(m.novTPM.tmp), "X2", "_")
+m.novTPM.tmp=data.frame(m.novTPM.tmp$X1, m.novTPM.tmp$X2_1, m.novTPM.tmp$X2_2, m.novTPM.tmp$value)
+colnames(m.novTPM.tmp) = c("trinity_id", "species", "tissue", "TPM")
+TPMse_novTrin = summarySE(m.novTPM.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 novMeanTPMmatrix=cast(TPMse_novTrin, trinity_id~species+tissue, value ="TPM")
-# # virTrinity
-# virTPM.tmp=virTmmMatrix
-# colnames(virTPM.tmp) = virSamples_data$V1
-# m.virTPM.tmp = as.data.frame(melt(as.matrix(virTPM.tmp)))
-# m.virTPM.tmp = cSplit(as.data.frame(m.virTPM.tmp), "X2", "_")
-# m.virTPM.tmp=data.frame(m.virTPM.tmp$X1, m.virTPM.tmp$X2_1, m.virTPM.tmp$X2_2, m.virTPM.tmp$value)
-# colnames(m.virTPM.tmp) = c("trinity_id", "species", "tissue", "TPM")
-# TPMse_virTrin = summarySE(m.virTPM.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
-TPMse_virTrin = read.table("ExpressionData/virTrin3_TPMse.txt", header = T, sep = "\t")
+
+# virTrinity
+virTPM.tmp=virTmmMatrix
+colnames(virTPM.tmp) = virSamples_data$V1
+m.virTPM.tmp = as.data.frame(melt(as.matrix(virTPM.tmp)))
+m.virTPM.tmp = cSplit(as.data.frame(m.virTPM.tmp), "X2", "_")
+m.virTPM.tmp=data.frame(m.virTPM.tmp$X1, m.virTPM.tmp$X2_1, m.virTPM.tmp$X2_2, m.virTPM.tmp$value)
+colnames(m.virTPM.tmp) = c("trinity_id", "species", "tissue", "TPM")
+TPMse_virTrin = summarySE(m.virTPM.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 virMeanTPMmatrix=cast(TPMse_virTrin, trinity_id~species+tissue, value ="TPM")
 
 
@@ -309,24 +305,28 @@ virMeanTPMmatrix=cast(TPMse_virTrin, trinity_id~species+tissue, value ="TPM")
 ################# Remove "bad" replicates  for DE analysis ###############################
 ### Based on the QC analysis above, some replicates show inconsistencies that are likely due to cross tissue contamination
 ### during dissections. The DE analysis will exclude these replicates
-## Define good replicates (propper replicate grouping and correlation)
+
+## Define good replicates (based on propper replicate grouping and correlation)
 amrGoodReps = c("amr_AG_1","amr_AG_3","amr_CR_2","amr_CR_3","amr_EB_1","amr_TS_2","amr_TS_3")
 lumGoodReps = c("lum_AG_1","lum_AG_2","lum_AG_3","lum_CR_1","lum_CR_3","lum_EB_1","lum_EB_2","lum_TS_1","lum_TS_2","lum_TS_3")
 novGoodReps = c("nov_AG_2","nov_AG_3","nov_CR_1","nov_CR_3","nov_EB_1","nov_EB_2","nov_TS_1","nov_TS_2","nov_TS_3")
 virGoodReps = c("vir_AG_1","vir_AG_2","vir_AG_3","vir_CR_1","vir_CR_3","vir_EB_1","vir_TS_1","vir_TS_2","vir_TS_3")
 grpGoodReps = c(amrGoodReps, lumGoodReps, novGoodReps, virGoodReps)
-## Create counts matrix with good replicates only
+
+## Generate counts matrices with good replicates only
 amrCountsMatrix.min200count.BRR=subset(amrCountsMatrix.min200count, select=amrGoodReps)
 lumCountsMatrix.min200count.BRR=subset(lumCountsMatrix.min200count, select=lumGoodReps)
 novCountsMatrix.min200count.BRR=subset(novCountsMatrix.min200count, select=novGoodReps)
 virCountsMatrix.min200count.BRR=subset(virCountsMatrix.min200count, select=virGoodReps)
 grpCountsMatrix.min200count.BRR=subset(grpCountsMatrix.min200count, select=grpGoodReps)
-## Create normalized TPM matrix with good replicates only
+
+## Generate normalized TPM matrix with good replicates only
 amrTmmMatrix.BRR=subset(amrTmmMatrix, select=amrGoodReps)
 lumTmmMatrix.BRR=subset(lumTmmMatrix, select=lumGoodReps)
 novTmmMatrix.BRR=subset(novTmmMatrix, select=novGoodReps)
 virTmmMatrix.BRR=subset(virTmmMatrix, select=virGoodReps)
 grpTmmMatrix.BRR=subset(grpTmmMatrix, select=grpGoodReps)
+
 ## Rename columns to keep replicate order
 # count matrices
 colnames(amrCountsMatrix.min200count.BRR) = c("amr_AG_1","amr_AG_2","amr_CR_1","amr_CR_2","amr_EB_1","amr_TS_1","amr_TS_2")
@@ -341,8 +341,10 @@ colnames(novTmmMatrix.BRR) = colnames(novCountsMatrix.min200count.BRR)
 colnames(virTmmMatrix.BRR) = colnames(virCountsMatrix.min200count.BRR)
 colnames(grpTmmMatrix.BRR) = colnames(grpCountsMatrix.min200count.BRR)
 
+
 ##############################################################################################
 ### Summary TPM table and matrix for gene level plots (includes good replicates only) ########
+
 # dvir1.06
 grpTPM2.tmp = grpTmmMatrix.BRR
 colnames(grpTPM2.tmp) = c(amrGoodReps, lumGoodReps, novGoodReps, virGoodReps)
@@ -354,54 +356,50 @@ m.grpTPM2.tmp.c = summarySE(m.grpTPM2.tmp, measurevar = "TPM", groupvars = c("FB
 fbgn_to_geneName=subset(gffRecord, select=c(FBgn_ID, gene_name))
 TPMseBRR = merge(fbgn_to_geneName, m.grpTPM2.tmp.c, all=TRUE)
 grpMeanTPMmatrix.BRR=cast(m.grpTPM2.tmp.c, FBgn_ID~species+tissue, value ="TPM")
-# # amrTrinity
-# amrTPM2.tmp = amrTmmMatrix.BRR
-# colnames(amrTPM2.tmp) = amrGoodReps
-# m.amrTPM2.tmp = as.data.frame(melt(as.matrix(amrTPM2.tmp)))
-# m.amrTPM2.tmp = cSplit(as.data.frame(m.amrTPM2.tmp), "X2", "_")
-# m.amrTPM2.tmp = data.frame(m.amrTPM2.tmp$X1, m.amrTPM2.tmp$X2_1,m.amrTPM2.tmp$X2_2, m.amrTPM2.tmp$value)
-# colnames(m.amrTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
-# TPMseBRR_amrTrin = summarySE(m.amrTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
-# write.table(x = TPMseBRR_amrTrin, file = "ExpressionData/amrTrin3_TPMseBRR.txt", quote = F, sep = "\t", row.names = F)
-TPMseBRR_amrTrin=read.table(file = "ExpressionData/amrTrin3_TPMseBRR.txt", header = T, sep = "\t")
+
+# amrTrinity
+amrTPM2.tmp = amrTmmMatrix.BRR
+colnames(amrTPM2.tmp) = amrGoodReps
+m.amrTPM2.tmp = as.data.frame(melt(as.matrix(amrTPM2.tmp)))
+m.amrTPM2.tmp = cSplit(as.data.frame(m.amrTPM2.tmp), "X2", "_")
+m.amrTPM2.tmp = data.frame(m.amrTPM2.tmp$X1, m.amrTPM2.tmp$X2_1,m.amrTPM2.tmp$X2_2, m.amrTPM2.tmp$value)
+colnames(m.amrTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
+TPMseBRR_amrTrin = summarySE(m.amrTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 amrMeanTPMmatrix.BRR=cast(TPMseBRR_amrTrin, trinity_id~species+tissue, value ="TPM")
-# # lumTrinity
-# lumTPM2.tmp = lumTmmMatrix.BRR
-# colnames(lumTPM2.tmp) = lumGoodReps
-# m.lumTPM2.tmp = as.data.frame(melt(as.matrix(lumTPM2.tmp)))
-# m.lumTPM2.tmp = cSplit(as.data.frame(m.lumTPM2.tmp), "X2", "_")
-# m.lumTPM2.tmp = data.frame(m.lumTPM2.tmp$X1, m.lumTPM2.tmp$X2_1,m.lumTPM2.tmp$X2_2, m.lumTPM2.tmp$value)
-# colnames(m.lumTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
-# TPMseBRR_lumTrin = summarySE(m.lumTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
-# write.table(x = TPMseBRR_lumTrin, file = "ExpressionData/lumTrin3_TPMseBRR.txt", quote = F, sep = "\t", row.names = F)
-TPMseBRR_lumTrin=read.table(file = "ExpressionData/lumTrin3_TPMseBRR.txt", header = T, sep = "\t")
+
+# lumTrinity
+lumTPM2.tmp = lumTmmMatrix.BRR
+colnames(lumTPM2.tmp) = lumGoodReps
+m.lumTPM2.tmp = as.data.frame(melt(as.matrix(lumTPM2.tmp)))
+m.lumTPM2.tmp = cSplit(as.data.frame(m.lumTPM2.tmp), "X2", "_")
+m.lumTPM2.tmp = data.frame(m.lumTPM2.tmp$X1, m.lumTPM2.tmp$X2_1,m.lumTPM2.tmp$X2_2, m.lumTPM2.tmp$value)
+colnames(m.lumTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
+TPMseBRR_lumTrin = summarySE(m.lumTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 lumMeanTPMmatrix.BRR=cast(TPMseBRR_lumTrin, trinity_id~species+tissue, value ="TPM")
-# # novTrinity
-# novTPM2.tmp = novTmmMatrix.BRR
-# colnames(novTPM2.tmp) = novGoodReps
-# m.novTPM2.tmp = as.data.frame(melt(as.matrix(novTPM2.tmp)))
-# m.novTPM2.tmp = cSplit(as.data.frame(m.novTPM2.tmp), "X2", "_")
-# m.novTPM2.tmp = data.frame(m.novTPM2.tmp$X1, m.novTPM2.tmp$X2_1,m.novTPM2.tmp$X2_2, m.novTPM2.tmp$value)
-# colnames(m.novTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
-# TPMseBRR_novTrin = summarySE(m.novTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
-# write.table(x = TPMseBRR_novTrin, file = "ExpressionData/novTrin3_TPMseBRR.txt", quote = F, sep = "\t", row.names = F)
-TPMseBRR_novTrin=read.table(file = "ExpressionData/novTrin3_TPMseBRR.txt", header = T, sep = "\t")
+
+# novTrinity
+novTPM2.tmp = novTmmMatrix.BRR
+colnames(novTPM2.tmp) = novGoodReps
+m.novTPM2.tmp = as.data.frame(melt(as.matrix(novTPM2.tmp)))
+m.novTPM2.tmp = cSplit(as.data.frame(m.novTPM2.tmp), "X2", "_")
+m.novTPM2.tmp = data.frame(m.novTPM2.tmp$X1, m.novTPM2.tmp$X2_1,m.novTPM2.tmp$X2_2, m.novTPM2.tmp$value)
+colnames(m.novTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
+TPMseBRR_novTrin = summarySE(m.novTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 novMeanTPMmatrix.BRR=cast(TPMseBRR_novTrin, trinity_id~species+tissue, value ="TPM")
-# # virTrinity
-# virTPM2.tmp = virTmmMatrix.BRR
-# colnames(virTPM2.tmp) = virGoodReps
-# m.virTPM2.tmp = as.data.frame(melt(as.matrix(virTPM2.tmp)))
-# m.virTPM2.tmp = cSplit(as.data.frame(m.virTPM2.tmp), "X2", "_")
-# m.virTPM2.tmp = data.frame(m.virTPM2.tmp$X1, m.virTPM2.tmp$X2_1,m.virTPM2.tmp$X2_2, m.virTPM2.tmp$value)
-# colnames(m.virTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
-# TPMseBRR_virTrin = summarySE(m.virTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
-# write.table(x = TPMseBRR_virTrin, file = "ExpressionData/virTrin3_TPMseBRR.txt", quote = F, sep = "\t", row.names = F)
-TPMseBRR_virTrin=read.table(file = "ExpressionData/virTrin3_TPMseBRR.txt", header = T, sep = "\t")
+
+# virTrinity
+virTPM2.tmp = virTmmMatrix.BRR
+colnames(virTPM2.tmp) = virGoodReps
+m.virTPM2.tmp = as.data.frame(melt(as.matrix(virTPM2.tmp)))
+m.virTPM2.tmp = cSplit(as.data.frame(m.virTPM2.tmp), "X2", "_")
+m.virTPM2.tmp = data.frame(m.virTPM2.tmp$X1, m.virTPM2.tmp$X2_1,m.virTPM2.tmp$X2_2, m.virTPM2.tmp$value)
+colnames(m.virTPM2.tmp) = c("trinity_id", "species", "tissue", "TPM")
+TPMseBRR_virTrin = summarySE(m.virTPM2.tmp, measurevar = "TPM", groupvars = c("trinity_id", "species", "tissue"))
 virMeanTPMmatrix.BRR=cast(TPMseBRR_virTrin, trinity_id~species+tissue, value ="TPM")
 
+
 ##########################################################
-##########################################################
-## Create specificity matrices (dvir1.06)
+###### Generate specificity matrices (dvir1.06) ##########
 
 # 1. within species
 #D.amr
@@ -412,6 +410,7 @@ tmp.amr.dvir1.06.MeanTPMmatrix[,1] = NULL
 amr.dvir1.06_Specificity_table = YazSpecificity(tmp.amr.dvir1.06.MeanTPMmatrix)
 amr.dvir1.06_Specificity_table = as.data.frame(amr.dvir1.06_Specificity_table)
 rm(tmp.amr.dvir1.06.MeanTPMmatrix)
+
 #D.lum
 lum.dvir1.06.MeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "lum_AG", "lum_CR", "lum_EB", "lum_TS"))
 tmp.lum.dvir1.06.MeanTPMmatrix = lum.dvir1.06.MeanTPMmatrix
@@ -420,6 +419,7 @@ tmp.lum.dvir1.06.MeanTPMmatrix[,1] = NULL
 lum.dvir1.06_Specificity_table = YazSpecificity(tmp.lum.dvir1.06.MeanTPMmatrix)
 lum.dvir1.06_Specificity_table = as.data.frame(lum.dvir1.06_Specificity_table)
 rm(tmp.lum.dvir1.06.MeanTPMmatrix)
+
 #D.nov
 nov.dvir1.06.MeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "nov_AG", "nov_CR", "nov_EB", "nov_TS"))
 tmp.nov.dvir1.06.MeanTPMmatrix = nov.dvir1.06.MeanTPMmatrix
@@ -428,6 +428,7 @@ tmp.nov.dvir1.06.MeanTPMmatrix[,1] = NULL
 nov.dvir1.06_Specificity_table = YazSpecificity(tmp.nov.dvir1.06.MeanTPMmatrix)
 nov.dvir1.06_Specificity_table = as.data.frame(nov.dvir1.06_Specificity_table)
 rm(tmp.nov.dvir1.06.MeanTPMmatrix)
+
 #D.vir
 vir.dvir1.06.MeanTPMmatrix = subset(grpMeanTPMmatrix.BRR, select=c("FBgn_ID", "vir_AG", "vir_CR", "vir_EB", "vir_TS"))
 tmp.vir.dvir1.06.MeanTPMmatrix = vir.dvir1.06.MeanTPMmatrix
@@ -469,9 +470,11 @@ TS.dvir1.06_Specificity_table = YazSpecificity(tmp.TS.grpMeanTPMmatrix)
 TS.dvir1.06_Specificity_table = as.data.frame(TS.dvir1.06_Specificity_table)
 rm(tmp.TS.grpMeanTPMmatrix)
 
+
+
 #############################################################################
 #############################################################################
-############  edgeR DE analysis I: Trinity ind. species #####################
+############  edgeR DE analysis I: Trinity transcriptomes ###################
 
 ### Identify tissue-biased genes for each species (>4-fold, < 0.001 FDR)
 
@@ -597,8 +600,9 @@ vir.TS.list=rownames(subset(vir.lrt.TS.v.rest.tTags.table, logFC.TS.v.AG > 2 & l
 
 #############################################################################
 #############################################################################
-###############  edgeR DE analysis I: group dvir1.06 ########################
+###############  edgeR DE analysis II: group dvir1.06 ########################
 
+## Set up design matrix
 grp.group = factor(c(1,1,2,2,3,4,4,5,5,5,6,6,7,7,8,8,8,9,9,10,10,11,11,12,12,12,13,13,13,14,14,15,16,16,16))
 grp.design = model.matrix(~0+grp.group)
 colnames(grp.design)=levels(factor(grpSamples_data$V1))
@@ -697,6 +701,9 @@ vir.dvir1.06.lrt.TS.v.rest.tTags = topTags(vir.dvir1.06.lrt.TS.v.rest, n = NULL)
 vir.dvir1.06.lrt.TS.v.rest.tTags.table = vir.dvir1.06.lrt.TS.v.rest.tTags$table
 vir.dvir1.06.TS.list=rownames(subset(vir.dvir1.06.lrt.TS.v.rest.tTags.table, logFC.TS.v.CR > 2 & logFC.TS.v.EB > 2 & logFC.TS.v.AG > 2 & FDR<0.001))
 
+###########
+###########
+
 # Create lists containing tissue-biased candidates by species
 AG_candidates = list(D.ame = amr.dvir1.06.AG.list, 
                       D.lum = lum.dvir1.06.AG.list, 
@@ -729,8 +736,6 @@ SFP_elements = lapply(SFP_combs, function(i) Setdiff(SFP_candidates[i], SFP_cand
 EB_elements = lapply(EB_combs, function(i) Setdiff(EB_candidates[i], EB_candidates[setdiff(names(EB_candidates), i)]))
 TS_elements = lapply(TS_combs, function(i) Setdiff(TS_candidates[i], TS_candidates[setdiff(names(TS_candidates), i)]))
 
-# example to show the partitioning of genes within each tissue element
-sapply(SFP_elements, length)
 
 ### Draw a VennDiagram of each element
 AG_candidates_Vdiag=venn.diagram(AG_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 0.8, cat.fontface= 4, cat.cex = 1, resolution = 1000, main = "acc. glands", main.cex = 1.6)
@@ -738,10 +743,9 @@ SFP_candidates_Vdiag=venn.diagram(SFP_candidates, NULL, fill=c("#670066", "#86bd
 EB_candidates_Vdiag=venn.diagram(EB_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 0.8, cat.fontface= 4, cat.cex = 1, resolution = 1000, main = "ejac. bulb", main.cex = 1.6)
 TS_candidates_Vdiag=venn.diagram(TS_candidates, NULL, fill=c("#670066", "#86bd38", "#29b5ff", "#717e36"), alpha=c(0.5,0.5,0.5,0.5), cex = 0.8, cat.fontface= 4, cat.cex = 1, resolution = 1000, main = "testes", main.cex = 1.6)
 
-# PLOT for 
-# pdf("ManuscripPlots/Figure.S8.VennDiagram.pdf", width = 6.9, height = 4.9)
+pdf("Plots/Figure.VennDiagrams.pdf", width = 6.9, height = 4.9)
 grid.arrange(gTree(children=AG_candidates_Vdiag), gTree(children =SFP_candidates_Vdiag), gTree(children=EB_candidates_Vdiag), gTree(children=TS_candidates_Vdiag), ncol=2)
-# dev.off()
+dev.off()
 
 
 ############################################################################
@@ -833,7 +837,6 @@ allAG.tmp = subset(allAG.tmp, FBgn_ID %!in% unlist(SFP_candidates))
 allAG.tmp = subset(allAG.tmp, FBgn_ID %in% unlist(AG_candidates))
 
 
-
 ## EJaculatory Bulb
 crossSpecies.EB.Contrasts=makeContrasts(amr.v.lum=amr_EB-lum_EB, amr.v.nov=amr_EB-nov_EB, amr.v.vir=amr_EB-vir_EB, lum.v.nov=lum_EB-nov_EB, lum.v.vir=lum_EB-vir_EB, nov.v.vir=nov_EB-vir_EB, levels = grp.design)
 
@@ -913,7 +916,6 @@ colnames(nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)[7:8] = c("S.right"
 
 allEB.tmp = rbind(amr.v.lum.lrt.crossSpecies.EB.Contrasts.tTags.table, amr.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table, amr.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table, lum.v.nov.lrt.crossSpecies.EB.Contrasts.tTags.table, lum.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table, nov.v.vir.lrt.crossSpecies.EB.Contrasts.tTags.table)
 allEB.tmp = subset(allEB.tmp, FBgn_ID %in% unlist(EB_candidates))
-
 
 
 ## Tetes 
@@ -1003,13 +1005,14 @@ crossSpecies.ALL.df = rbind(allAG.tmp, allEB.tmp, allTS.tmp)
 crossSpecies.ALL.df$Sig = ifelse(crossSpecies.ALL.df$FDR < 0.01, "YES", "NO")
 crossSpecies.ALL.df = merge(crossSpecies.ALL.df, gffRecord)
 
-# pdf("ManuscripPlots/Figure.S9.tiss-biased.volcanoPlots.pdf", width = 11.5, height = 5.3)
+# Plot it
+pdf("Plots/Figure.tiss-biased.volcanoPlots.pdf", width = 11.5, height = 5.3)
 ggplot() + 
   geom_point(data = subset(crossSpecies.ALL.df, logFC > 2 & FDR < 0.001), aes (logFC, S.right, colour = S.right), alpha = 0.6) + 
   geom_point(data = subset(crossSpecies.ALL.df, logFC < -2 & FDR < 0.001), aes (logFC, S.left, colour = S.left), alpha = 0.6) + 
   facet_grid(tissue~comparison, scales = "free") + 
   # scale_colour_manual(values = c("#88d542", "#0eacc2")) + 
-  labs(colour="cross-species\nspecificity") +
+  ylab("cross-species specificity (S)") +
   scale_size(range = c(-2, 2)) + 
   theme_bw() + 
   theme(axis.title.x = element_text(face = "bold", size = 12, vjust=0.1), axis.text.x=element_text(face = "bold", size = 12),axis.text.y = element_text(face = "bold", size = 12), axis.title.y = element_text(face = "bold.italic", size = 12, vjust=0.1), strip.text=element_text(face="bold.italic", size = 11), legend.position = "none")
@@ -1214,6 +1217,7 @@ chromNumber.virAG$tissue = "Accessory glands"
 chromNumber.virAG = merge(TotalGeneNumber, chromNumber.virAG)
 chromNumber.virAG$`Expected genes` = genomeNumber.virAG*chromNumber.virAG$proportion
 chromNumber.virAG$`obs.exp` = chromNumber.virAG$Observed_biased_genes/chromNumber.virAG$`Expected genes`
+
 
 genomeNumber.virSFP = length(vir.dvir1.06.SFP.list)
 chromNumber.virSFP=as.data.frame(table(factor(subset(gffRecord, FBgn_ID %in% vir.dvir1.06.SFP.list & grepl("Chr", chromosome) & chromosome != "Chr_6")$chromosome)))
