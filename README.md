@@ -1,12 +1,9 @@
 # Virilis sub-group Male RNAseq analysis pipeline
 
 
-Analysis Pipeline for virilis subgroup male RNAseq. Raw data used in these analysis can be downloaded from this link: 
-```
+Raw data used in these analysis can be downloaded from this link: 
+https://www.dropbox.com/sh/wvjnj05o8h5cdu7/AAA87TkSbKEh630i0hiZSYREa?dl=0
 
-```
-Raw sequence reads are available through the Sequence Read Archive under accessions: 
-```
+Raw sequence reads are available through the Sequence Read Archive under accessions: SRP100565 
 
-```
 
