@@ -1,4 +1,4 @@
-# Virilis sub-group Male RNAseq analysis pipeline
+# Virilis subgroup Male RNAseq analysis pipeline
 
 
 Processed data files can be downloaded from this link: 
